@@ -52,5 +52,4 @@ public class TestScanner {
         chk("1 $$bla 2", new String[]{"1", " ", "$$bla", " ", "2"});
         chk("1 \"a\"  2", new String[]{"1", " ", "\"a\"", "  ", "2"});
     }
-
 }
