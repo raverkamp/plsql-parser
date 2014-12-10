@@ -66,7 +66,7 @@ public class TestParser {
         checkExpr("case when 1 then 2 else 4 end");
         checkExpr("date '2001-1-1'");
         checkExpr("trunc(date '2001-1-1')");
-        
+
     }
 
     public void tpa(Pa p, String s) {
@@ -84,10 +84,10 @@ public class TestParser {
         tpa(p.pExpr, "l_source (index_inout).text NOT LIKE '%*/%'");
         tpa(p.pExpr, "(l_source (index_inout).text NOT LIKE '%*/%')");
         tpa(p.pExpr, "string_in LIKE c_mask");
-        tpa(p.pExpr,"lower($$PLSQL_UNIT)");
+        tpa(p.pExpr, "lower($$PLSQL_UNIT)");
         tpa(p.pDeclaration, "TYPE vat IS VARRAY(100) OF EMPLOYEES%ROWTYPE");
         tpa(p.pDeclaration, "TYPE EMPLOYEES_rc IS REF CURSOR RETURN EMPLOYEES%ROWTYPE");
-        tpa(p.pDeclaration,"C_SCOPE_PREFIX constant VARCHAR2(31) := lower($$PLSQL_UNIT) || '.'");
+        tpa(p.pDeclaration, "C_SCOPE_PREFIX constant VARCHAR2(31) := lower($$PLSQL_UNIT) || '.'");
         tpa(p.pExpr, "PLTEXT IS NULL");
         tpa(p.pAndExpr, "ptFinLigne > 0 AND ptDebLigne >12");
         tpa(p.pDataType, "a");

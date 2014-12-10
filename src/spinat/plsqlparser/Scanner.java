@@ -180,9 +180,9 @@ public class Scanner {
             }
         }
     }
-    
+
     int scanDollarDollarIdent(int pos) {
-        int p = scanIdent(pos+2);
+        int p = scanIdent(pos + 2);
         return p;
     }
 
@@ -310,8 +310,8 @@ public class Scanner {
                 return tok1(TokenType.Colon);
             case '!':
                 return tok1(TokenType.Exclamation);
-            case '"' :
-                return tokx(TokenType.QIdent,scanQIdent(this.start));
+            case '"':
+                return tokx(TokenType.QIdent, scanQIdent(this.start));
             default:
                 if (isArabicDigit(c)) {
                     return scanNumber(this.start);
@@ -358,8 +358,8 @@ public class Scanner {
                     return tok2(TokenType.LabelEnd);
                 case "q'":
                     return tokx(TokenType.QString, qString(this.start));
-                case "$$" :
-                    return tokx(TokenType.DollarDollarIdent,scanDollarDollarIdent(this.start));
+                case "$$":
+                    return tokx(TokenType.DollarDollarIdent, scanDollarDollarIdent(this.start));
                 default:
                     if (get(start) == '.' && isArabicDigit(get(start + 1))) {
                         return tokx(TokenType.Float, scanFloat(this.start));

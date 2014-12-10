@@ -1,11 +1,10 @@
 package spinat.plsqlparser;
 
-
 // contains range information for parsing
 // if a class is a subclass of this class
 // it gets extended with range information during parsing
-
 public abstract class Ranged {
+
     private int start = -1;
     private int end = -1;
 

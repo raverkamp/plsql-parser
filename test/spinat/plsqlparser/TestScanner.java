@@ -13,11 +13,14 @@ public class TestScanner {
     public TestScanner() {
     }
 
+    // decompose String str and check that token i is equal to s
     static void chk(String str, int i, String s) {
         ArrayList<Token> a = Scanner.scanAll(str);
         Assert.assertEquals(a.get(i).str, s);
     }
 
+    // decompose the String s into tokens and the list of tokens is equal to
+    // s
     static void chk(String str, String[] s) {
         ArrayList<Token> a = Scanner.scanAll(str);
         Assert.assertEquals(s.length, a.size() - 1);
@@ -47,7 +50,7 @@ public class TestScanner {
         chk("1 'a''b''' x", 4, "x");
         chk("1 q'[<script>]' 2", new String[]{"1", " ", "q'[<script>]'", " ", "2"});
         chk("1 $$bla 2", new String[]{"1", " ", "$$bla", " ", "2"});
-        chk("1 \"a\"  2",new String[]{"1"," ","\"a\"","  ","2"});
+        chk("1 \"a\"  2", new String[]{"1", " ", "\"a\"", "  ", "2"});
     }
 
 }

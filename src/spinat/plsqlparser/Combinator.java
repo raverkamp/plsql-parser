@@ -25,7 +25,7 @@ public class Combinator {
         };
     }
 
-    public <X, Y> Pa<Y> commit(final Pa<X> p1,final Pa<Y> p2) {
+    public <X, Y> Pa<Y> commit(final Pa<X> p1, final Pa<Y> p2) {
         return new Pa<Y>() {
             public String toString() {
                 return "commit(" + p1 + "->" + p2 + ")";
@@ -64,7 +64,7 @@ public class Combinator {
                     if (r2 == null) {
                         return null;
                     } else {
-                        return new Res<T2<X, Y>>(new T2<X,Y>(r1.v, r2.v), r2.next);
+                        return new Res<T2<X, Y>>(new T2<X, Y>(r1.v, r2.v), r2.next);
                     }
                 }
 
@@ -95,7 +95,7 @@ public class Combinator {
     public <X> Pa<Boolean> bopt(final Pa<X> p) {
 
         return new Pa<Boolean>() {
-            
+
             public String toString() {
                 return "bopt(" + p + ")";
             }
@@ -113,10 +113,11 @@ public class Combinator {
 
     public Pa<String> token(final TokenType tt) {
         return new Pa<String>() {
-            
+
             public String toString() {
-                return "token(" + tt +")";
+                return "token(" + tt + ")";
             }
+
             @Override
             public Res<String> par(Seq s) {
                 if (s.head().ttype == tt) {
@@ -140,7 +141,6 @@ public class Combinator {
     public final Pa<String> pAssign = token(TokenType.Assign);
     public final Pa<String> pLabelStart = token(TokenType.LabelStart);
     public final Pa<String> pLabelEnd = token(TokenType.LabelEnd);
-    
 
     public Pa<String> forkw(final String kw) {
         return new Pa<String>() {
@@ -222,7 +222,7 @@ public class Combinator {
                     }
                     Res<X> rr2 = pa.pa(rr.next);
                     if (rr2 == null) {
-                        throw new ParseException("expecteing one more thing",rr.next);
+                        throw new ParseException("expecteing one more thing", rr.next);
                     }
                     s = rr2.next;
                 }
@@ -325,7 +325,7 @@ public class Combinator {
             @Override
             public Res<X> par(Seq s) {
                 for (Pa p : pas) {
-                     @SuppressWarnings("unchecked") 
+                    @SuppressWarnings("unchecked")
                     Pa<X> p2 = (Pa<X>) p;
                     Res<X> r = p2.pa(s);
                     if (r != null) {
