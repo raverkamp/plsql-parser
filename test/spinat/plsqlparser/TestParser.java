@@ -101,6 +101,8 @@ public class TestParser {
         tpa(p.pDeclaration, "a b.c");
         tpa(p.pDeclaration, "hits aaa_coverage_tool.bool_tab");
         tpa(p.pDeclaration, "\"$hits\" aaa_coverage_tool.bool_tab");
+        tpa(p.pDeclaration," \"a\" b");
+        tpa(p.pDeclaration," \"a\" exception");
         tpa(p.pExpr, "PLTEXT IS NULL");
         tpa(p.pAndExpr, "ptFinLigne > 0 AND ptDebLigne >12");
         tpa(p.pDataType, "a");
@@ -150,6 +152,8 @@ public class TestParser {
         tpa(p.pStatement, "begin fetch a bulk collect into bla,blub;end");
         tpa(p.pStatement, "begin fetch a bulk collect into bla,blub limit 123;end");
         tpa(p.pStatement, "select dummy as \"x\" into y from dual");
+        tpa(p.pStatement, "x:=1");
+        tpa(p.pStatement, "\"x\":=1");
     }
 
     public void testPackage(String filename) {

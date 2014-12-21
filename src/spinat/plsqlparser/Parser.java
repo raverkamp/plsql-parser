@@ -1479,72 +1479,70 @@ public class Parser {
 
     public Res<Ast.Statement> parseStatement(Seq s) {
         Res<String> r = justkw.pa(s);
-        // fixme: markers do not start with akeyword
-        if (r == null) {
-            return null;
-        }
-        switch (r.v) {
-            case "end":
-            case "exception": // exception block begins
-            case "when": // next exception list
-            case "else": // next exception list
-            case "elsif": // next exception list
-                return null;
-            case "null":
-                return new Res<Ast.Statement>(new Ast.NullStatement(), r.next);
-            case "savepoint":
-                return paSavePoint(s);
-            case "rollback":
-                return paRollback(s);
-            case "begin":
-                return paBlock_committed(s);
-            case "declare":
-                return paBlock_committed(s);
-            case "for":
-                return paForLoop(s);
-            case "loop":
-                return paSimpleLoop(s);
-            case "while":
-                return paWhileLoopStatement(s);
-            case "case":
-                return paCaseStatement(s);
-            case "raise":
-                return paRaiseStatement(s);
-            case "return":
-                return paReturnStatement(s);
-            case "open":
-                return paOpenStatement(s);
-            case "close":
-                return paCloseStatement(s);
-            case "if":
-                return paIfStatement(s);
-            case "fetch":
-                return paFetchStatement(s);
-            case "exit":
-                return paExitStatement(s);
-            case "continue":
-                return paContinueStatement(s);
-            case "pipe": /*row */
+        if (r != null) {
+            switch (r.v) {
+                case "end":
+                case "exception": // exception block begins
+                case "when": // next exception list
+                case "else": // next exception list
+                case "elsif": // next exception list
+                    return null;
+                case "null":
+                    return new Res<Ast.Statement>(new Ast.NullStatement(), r.next);
+                case "savepoint":
+                    return paSavePoint(s);
+                case "rollback":
+                    return paRollback(s);
+                case "begin":
+                    return paBlock_committed(s);
+                case "declare":
+                    return paBlock_committed(s);
+                case "for":
+                    return paForLoop(s);
+                case "loop":
+                    return paSimpleLoop(s);
+                case "while":
+                    return paWhileLoopStatement(s);
+                case "case":
+                    return paCaseStatement(s);
+                case "raise":
+                    return paRaiseStatement(s);
+                case "return":
+                    return paReturnStatement(s);
+                case "open":
+                    return paOpenStatement(s);
+                case "close":
+                    return paCloseStatement(s);
+                case "if":
+                    return paIfStatement(s);
+                case "fetch":
+                    return paFetchStatement(s);
+                case "exit":
+                    return paExitStatement(s);
+                case "continue":
+                    return paContinueStatement(s);
+                case "pipe": /*row */
 
-                return paPipeRowStatement(s);
-            case "execute": /* execute immediate */
+                    return paPipeRowStatement(s);
+                case "execute": /* execute immediate */
 
-                return paExecuteImmediate(s);
+                    return paExecuteImmediate(s);
 
-            case "goto":
-                return paGotoStatement(s);
-            case "forall":
-                return paForAllStatement(s);
-            case "insert":
-            case "update":
-            case "delete":
-            case "merge":
-            case "select":
+                case "goto":
+                    return paGotoStatement(s);
+                case "forall":
+                    return paForAllStatement(s);
+                case "insert":
+                case "update":
+                case "delete":
+                case "merge":
+                case "select":
             // with q as (select * from dual) select dummy fromdual into bla from q:
-            // is a valid select sql statement, to be exact we should check 
-            // that with is not a procedure or variable name 
-            case "with": // with q as (select * from dual) select dummy fromdual into bla from q:
-                return paSQLStatement(s);
+                // is a valid select sql statement, to be exact we should check 
+                // that with is not a procedure or variable name 
+                case "with": // with q as (select * from dual) select dummy fromdual into bla from q:
+                    return paSQLStatement(s);
+            }
         }
         return paAssignOrCallStatement(s);
     }
