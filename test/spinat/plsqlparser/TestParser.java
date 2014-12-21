@@ -52,6 +52,7 @@ public class TestParser {
     public void test2() {
 
         checkExpr("a");
+        checkExpr("\"a\"");
         checkExpr("a.b");
 
         checkExpr("a(b)");
@@ -85,9 +86,21 @@ public class TestParser {
         tpa(p.pExpr, "(l_source (index_inout).text NOT LIKE '%*/%')");
         tpa(p.pExpr, "string_in LIKE c_mask");
         tpa(p.pExpr, "lower($$PLSQL_UNIT)");
+        tpa(p.pIdent, "\"a\"");
+
+        tpa(p.pExpr, "\"a\"");
+
+        tpa(p.pDataType, "a");
+        tpa(p.pDataType, "a.b");
+
         tpa(p.pDeclaration, "TYPE vat IS VARRAY(100) OF EMPLOYEES%ROWTYPE");
         tpa(p.pDeclaration, "TYPE EMPLOYEES_rc IS REF CURSOR RETURN EMPLOYEES%ROWTYPE");
         tpa(p.pDeclaration, "C_SCOPE_PREFIX constant VARCHAR2(31) := lower($$PLSQL_UNIT) || '.'");
+        tpa(p.pDeclaration, "a number");
+        tpa(p.pDeclaration, "a b");
+        tpa(p.pDeclaration, "a b.c");
+        tpa(p.pDeclaration, "hits aaa_coverage_tool.bool_tab");
+        tpa(p.pDeclaration, "\"$hits\" aaa_coverage_tool.bool_tab");
         tpa(p.pExpr, "PLTEXT IS NULL");
         tpa(p.pAndExpr, "ptFinLigne > 0 AND ptDebLigne >12");
         tpa(p.pDataType, "a");
