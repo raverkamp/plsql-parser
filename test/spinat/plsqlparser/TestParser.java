@@ -67,6 +67,7 @@ public class TestParser {
         checkExpr("case when 1 then 2 else 4 end");
         checkExpr("date '2001-1-1'");
         checkExpr("trunc(date '2001-1-1')");
+        checkExpr("-11*-8");
 
     }
 
@@ -101,8 +102,8 @@ public class TestParser {
         tpa(p.pDeclaration, "a b.c");
         tpa(p.pDeclaration, "hits aaa_coverage_tool.bool_tab");
         tpa(p.pDeclaration, "\"$hits\" aaa_coverage_tool.bool_tab");
-        tpa(p.pDeclaration," \"a\" b");
-        tpa(p.pDeclaration," \"a\" exception");
+        tpa(p.pDeclaration, " \"a\" b");
+        tpa(p.pDeclaration, " \"a\" exception");
         tpa(p.pExpr, "PLTEXT IS NULL");
         tpa(p.pAndExpr, "ptFinLigne > 0 AND ptDebLigne >12");
         tpa(p.pDataType, "a");
@@ -154,6 +155,15 @@ public class TestParser {
         tpa(p.pStatement, "select dummy as \"x\" into y from dual");
         tpa(p.pStatement, "x:=1");
         tpa(p.pStatement, "\"x\":=1");
+    }
+
+    @Test
+    public void testTypeDeclaration() {
+        Parser p = new Parser();
+        tpa(p.pDeclaration, "subtype a is integer RANGE 1 .. 2");
+        tpa(p.pDeclaration, "subtype a is integer RANGE 1 .. 2 not null");
+        tpa(p.pDeclaration, "subtype a is integer RANGE -1 .. 2 not null");
+        tpa(p.pDeclaration, "subtype a is integer not null");
     }
 
     public void testPackage(String filename) {

@@ -528,9 +528,11 @@ public class Ast {
 
         public final DataType datatype;
         public final boolean notnull;
+        public final T2<Integer,Integer> range;
 
-        public SubType(DataType datatype, boolean notnull) {
+        public SubType(DataType datatype,T2<Integer,Integer> range, boolean notnull) {
             this.datatype = datatype;
+            this.range = range;
             this.notnull = notnull;
         }
     }

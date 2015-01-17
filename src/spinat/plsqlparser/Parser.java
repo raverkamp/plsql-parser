@@ -82,8 +82,13 @@ public class Parser {
     Pa<String> pkw_default = c.forkw("default");
     Pa<String> pkw_with = c.forkw("with");
     Pa<String> pkw_limit = c.forkw("limit");
+    Pa<String> pkw_range = c.forkw("range");
+    Pa<String> pkw_in = c.forkw("in");
+    Pa<String> pkw_out = c.forkw("out");
+    Pa<String> pkw_in_out = c.forkw2("in", "out");
+    Pa<String> pkw_nocopy = c.forkw("nocopy");
 
-    Pa<Integer> pInteger = new Pa<Integer>() {
+    Pa<Integer> pNatural = new Pa<Integer>() {
 
         final Pa<String> p = c.token(TokenType.Int);
 
@@ -99,7 +104,37 @@ public class Parser {
 
         @Override
         public String toString() {
-            return "pInteger";
+            return "pNatural";
+        }
+    };
+
+    Pa<Integer> pInteger = new Pa<Integer>() {
+        final Pa<String> p = c.token(TokenType.Int);
+
+        @Override
+        public Res<Integer> par(Seq s) {
+            Res rm = c.token(TokenType.Minus).pa(s);
+            int sign = 1;
+            if (rm != null) {
+                s = rm.next;
+                sign = -1;
+            } else {
+                Res rp = c.token(TokenType.Plus).pa(s);
+                if (rp != null) {
+                    s = rp.next;
+                }
+            }
+            Res<String> r = p.pa(s);
+            if (r != null) {
+                return new Res<>(new Integer(r.v) * sign, r.next);
+            } else {
+                return null;
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "pNatural";
         }
     };
 
@@ -701,11 +736,11 @@ public class Parser {
         Res<T2<Ast.Ident, String>> r3 = c.seq2(pIdent, c.pPOpen).pa(s);
         if (r3 != null) {
             if (r3.v.f1.val.equalsIgnoreCase("varchar2")) {
-                Res<T2<Integer, String>> r99 = c.seq2(pInteger, c.opt(c.or2(c.forkw("char"), c.forkw("byte")))).pa(r3.next);
+                Res<T2<Integer, String>> r99 = c.seq2(pNatural, c.opt(c.or2(c.forkw("char"), c.forkw("byte")))).pa(r3.next);
                 Res r100 = c.mustp(c.pPClose, "expecting ')'").pa(r99.next);
                 return new Res<Ast.DataType>(new Ast.ParameterizedType(r3.v.f1, r99.v.f1, null), r100.next);
             } else {
-                Res<T2<Integer, T2<String, Integer>>> r99 = c.seq2(pInteger, c.opt(c.seq2(c.pComma, pInteger))).pa(r3.next);
+                Res<T2<Integer, T2<String, Integer>>> r99 = c.seq2(pNatural, c.opt(c.seq2(c.pComma, pNatural))).pa(r3.next);
                 Res r100 = c.mustp(c.pPClose, "expecting ')'").pa(r99.next);
                 Integer z;
                 if (r99.v.f2 != null) {
@@ -951,7 +986,7 @@ public class Parser {
             if (r == null) {
                 return null;
             }
-            Res<Integer> r2 = c.withParensCommit(pInteger, r.next);
+            Res<Integer> r2 = c.withParensCommit(pNatural, r.next);
             Res<T3<String, Ast.DataType, Boolean>> r3 = c.seq3(pkw_of, pDataType, c.bopt(pNotNull)).pa(r2.next);
             return new Res<Ast.TypeDefinition>(new Ast.Varray(r3.v.f2, r2.v, r3.v.f3), r3.next);
         }
@@ -986,6 +1021,20 @@ public class Parser {
         return null;
     }
 
+    public Pa<T2<Integer, Integer>> pRangeOption = new Pa<T2<Integer, Integer>>() {
+
+        @Override
+        protected Res<T2<Integer, Integer>> par(Seq s) {
+            Res<String> r = pkw_range.pa(s);
+            if (r == null) {
+                return new Res<>(null, s);
+            }
+            Res<T3<Integer, String, Integer>> r2 = c.seq3(pInteger, c.pDotDot, pInteger).pa(r.next);
+            must(r2, r.next, "expectint int .. int ");
+            return new Res<>(new T2<Integer, Integer>(r2.v.f1, r2.v.f3), r2.next);
+        }
+    };
+
 //    fun pSubTypeDefinition s  =
 //    tr(commit(kw "subtype", seq4(pIdent,kw "is",pDataType,bopt(pNotNull))),
 //       fn (_,(name,_,dt,nn)) =>   TypeDefinition (name,SubType (dt,nn))) s
@@ -994,17 +1043,13 @@ public class Parser {
         if (r == null) {
             return null;
         }
-        Res<T2<Ast.Ident, String>> ris = c.mustp(c.seq2(pIdent, pkw_is), "expecting 'bla is'").pa(r.next);
+        Res<T2<Ast.Ident, String>> ris = c.mustp(c.seq2(pIdent, pkw_is), "expecting '<subtypename> is'").pa(r.next);
 
         Ast.Ident name = ris.v.f1;
-        Res<T2<Ast.DataType, Boolean>> r2 = c.seq2(pDataType, c.bopt(pNotNull)).pa(ris.next);
-        return new Res<Ast.Declaration>(new Ast.TypeDeclaration(name, new Ast.SubType(r2.v.f1, r2.v.f2)), r2.next);
-    }
 
-    Pa<String> pkw_in = c.forkw("in");
-    Pa<String> pkw_out = c.forkw("out");
-    Pa<String> pkw_in_out = c.forkw2("in", "out");
-    Pa<String> pkw_nocopy = c.forkw("nocopy");
+        Res<T3<Ast.DataType, T2<Integer, Integer>, Boolean>> r2 = c.seq3(pDataType, pRangeOption, c.bopt(pNotNull)).pa(ris.next);
+        return new Res<Ast.Declaration>(new Ast.TypeDeclaration(name, new Ast.SubType(r2.v.f1, r2.v.f2, r2.v.f3)), r2.next);
+    }
 
     public Res<Ast.ParamMode> paParamModeOption(Seq s) {
         Res<String> r = pkw_in_out.pa(s);
@@ -1537,7 +1582,7 @@ public class Parser {
                 case "delete":
                 case "merge":
                 case "select":
-            // with q as (select * from dual) select dummy fromdual into bla from q:
+                // with q as (select * from dual) select dummy fromdual into bla from q:
                 // is a valid select sql statement, to be exact we should check 
                 // that with is not a procedure or variable name 
                 case "with": // with q as (select * from dual) select dummy fromdual into bla from q:
