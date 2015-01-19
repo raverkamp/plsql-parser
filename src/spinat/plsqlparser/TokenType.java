@@ -9,6 +9,8 @@ public enum TokenType {
     Ident,
     LParen,
     RParen,
+    LBracket,
+    RBracket,
     Assign,
     Comma,
     Semi,

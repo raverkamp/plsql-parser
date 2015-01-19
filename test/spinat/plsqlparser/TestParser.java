@@ -111,10 +111,16 @@ public class TestParser {
         tpa(p.pDataType, "a.b%type");
         tpa(p.pDataType, "a.b%rowtype");
         tpa(p.pDataType, "CHAR(1)");
+        tpa(p.pDataType, "varchar2(1000 char)");
+        tpa(p.pDataType, "varchar(1000 char)");
 
         tpa(p.pItemDeclaration, "a b");
         tpa(p.pAndExpr, "ptFinLigne > 0");
         tpa(p.pExpr, "q'[<script>]'");
+        tpa(p.pExpr, "extract(year from to_date(bla))");
+        tpa(p.pExpr, "\"EXTRACT\"(year from sysdate)");
+        tpa(p.pExpr, "extract(1,2,3)");
+        tpa(p.pExpr, "a multiset union all b(c.d, e.f)");
 
     }
 
@@ -155,6 +161,11 @@ public class TestParser {
         tpa(p.pStatement, "select dummy as \"x\" into y from dual");
         tpa(p.pStatement, "x:=1");
         tpa(p.pStatement, "\"x\":=1");
+        tpa(p.pStatement, "open c for with a as (select * from dual) select * from a");
+        tpa(p.pStatement, "  pipe row(lo_res)");
+        tpa(p.pStatement, "loop null;  END LOOP bla");
+        tpa(p.pStatement, "begin case bla when 'a' then null; else assa(1,2,3);  END CASE bla; end");
+        tpa(p.pStatement, "begin case bla when 'a' then bla(77); else a:=x;  END CASE; end");
     }
 
     @Test

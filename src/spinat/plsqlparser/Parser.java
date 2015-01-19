@@ -87,6 +87,9 @@ public class Parser {
     Pa<String> pkw_out = c.forkw("out");
     Pa<String> pkw_in_out = c.forkw2("in", "out");
     Pa<String> pkw_nocopy = c.forkw("nocopy");
+    Pa<String> pkw_from = c.forkw("from");
+    // do not care about the string, what operators are there else?
+    Pa pkw_multiset_union_all = c.seq2(c.forkw2("multiset", "union"), c.forkw("all"));
 
     Pa<Integer> pNatural = new Pa<Integer>() {
 
@@ -355,7 +358,8 @@ public class Parser {
     }
 
     Res<Expression> paInExpression(Seq s) {
-        Res<Expression> r = paAddExpression(s);
+        // multiset !
+        Res<Expression> r = paMultisetExpression(s);
         if (r == null) {
             return null;
         }
@@ -372,6 +376,26 @@ public class Parser {
             return new Res<Expression>(new Ast.NotExpr(e), r4.next);
         }
 
+    }
+
+    Res<Expression> paMultisetExpression(Seq s) {
+        // fixme
+        Res<Expression> r = paAddExpression(s);
+        if (r == null) {
+            return null;
+        }
+        Expression e = r.v;
+        Seq ss = r.next;
+        while (true) {
+            Res rmu = pkw_multiset_union_all.pa(ss);
+            if (rmu == null) {
+                return new Res<Expression>(e, ss);
+            }
+            Res<Expression> r2 = paAddExpression(rmu.next);
+            must(r2, rmu.next, "expecting an expression");
+            e = new Ast.MultisetExpr("multi", e, r2.v);
+            ss = r2.next;
+        }
     }
 
     Res<Expression> paAddExpression(Seq s) {
@@ -632,7 +656,40 @@ public class Parser {
         return new Res<List<Ast.CallPart>>(l, next);
     }
 
+    Res<Expression> paExtractFunction(Seq s) {
+        Res<Ast.Ident> r = pIdent.pa(s);
+        if (r == null || !r.v.val.equals("EXTRACT")) {
+            return null;
+        }
+        Res r2 = c.pPOpen.pa(r.next);
+        if (r2 == null) {
+            return null;
+        }
+        Res<String> r3 = justkw.pa(r2.next);
+        if (r3 == null) {
+            return null;
+        }
+        if (!(r3.v.equalsIgnoreCase("year")
+                || r3.v.equalsIgnoreCase("month")
+                || r3.v.equalsIgnoreCase("day"))) {
+            return null;
+        }
+        Res r4 = pkw_from.pa(r3.next);
+        if (r4 == null) {
+            return null;
+        }
+        // from here comitted
+        Res<Ast.Expression> r5 = c.mustp(pExpr, "expression").pa(r4.next);
+        Res r6 = c.mustp(c.pPClose, "close paren").pa(r5.next);
+        return new Res<Expression>(new Ast.ExtractDatePart(r3.v.toUpperCase(), r5.v), r6.next);
+    }
+
     Res<Expression> paVariableOrFunctionCall(Seq s) {
+        Res<Expression> r_extract = paExtractFunction(s);
+        if (r_extract != null) {
+            return r_extract;
+        }
+
         Res<List<Ast.CallPart>> r = paCallParts(s);
         if (r == null) {
             return null;
@@ -735,7 +792,8 @@ public class Parser {
         // parametrisierter typ varchar2, varchar ,raw, number
         Res<T2<Ast.Ident, String>> r3 = c.seq2(pIdent, c.pPOpen).pa(s);
         if (r3 != null) {
-            if (r3.v.f1.val.equalsIgnoreCase("varchar2")) {
+            String tyname1 = r3.v.f1.val;
+            if (tyname1.equalsIgnoreCase("varchar2") || tyname1.equalsIgnoreCase("varchar")) {
                 Res<T2<Integer, String>> r99 = c.seq2(pNatural, c.opt(c.or2(c.forkw("char"), c.forkw("byte")))).pa(r3.next);
                 Res r100 = c.mustp(c.pPClose, "expecting ')'").pa(r99.next);
                 return new Res<Ast.DataType>(new Ast.ParameterizedType(r3.v.f1, r99.v.f1, null), r100.next);
@@ -1545,7 +1603,7 @@ public class Parser {
                 case "for":
                     return paForLoop(s);
                 case "loop":
-                    return paSimpleLoop(s);
+                    return paSimpleLoop_comitted(s);
                 case "while":
                     return paWhileLoopStatement(s);
                 case "case":
@@ -1755,14 +1813,13 @@ public class Parser {
         Res r1 = c.mustp(pkw_loop, "expecting loop").pa(s);
         Res<List<Ast.Statement>> r2 = paStatementList(r1.next);
         Res re = c.mustp(pkw_end_loop, "expecting end loop").pa(r2.next);
-        return new Res<>(r2.v, re.next);
+        Res re2 = c.opt(pIdent).pa(re.next);
+        return new Res<>(r2.v, re2.next);
     }
 
-    Res<Ast.Statement> paSimpleLoop(Seq s) {
-        Res r1 = c.mustp(pkw_loop, "expecting loop").pa(s);
-        Res<List<Ast.Statement>> r2 = paStatementList(r1.next);
-        Res re = c.mustp(pkw_end_loop, " expectingen end loop").pa(r2.next);
-        return new Res<Ast.Statement>(new Ast.BasicLoopStatement(r2.v), re.next);
+    Res<Ast.Statement> paSimpleLoop_comitted(Seq s) {
+        Res<List<Ast.Statement>> r2 = paLoopBody_comitted(s);
+        return new Res<Ast.Statement>(new Ast.BasicLoopStatement(r2.v), r2.next);
     }
 
     Res<Ast.Statement> paWhileLoopStatement(Seq s) {
@@ -1867,10 +1924,11 @@ public class Parser {
             elsestmts = null;
         }
         Res rend_case = pkw_end_case.pa(next);
+        Res rend_case2 = c.opt(pIdent).pa(rend_case.next);
         if (m == null) {
-            return new Res<Ast.Statement>(new Ast.CaseCondStatement(l, elsestmts), rend_case.next);
+            return new Res<Ast.Statement>(new Ast.CaseCondStatement(l, elsestmts), rend_case2.next);
         } else {
-            return new Res<Ast.Statement>(new Ast.CaseMatchStatement(m, l, elsestmts), rend_case.next);
+            return new Res<Ast.Statement>(new Ast.CaseMatchStatement(m, l, elsestmts), rend_case2.next);
         }
     }
 
@@ -1910,7 +1968,7 @@ public class Parser {
             }
         } else {
             // ref cursor 
-            Res rselect = pkw_select.pa(rf.next);
+            Res rselect = c.or2(pkw_select, pkw_with).pa(rf.next);
             if (rselect == null) {
                 Res<Expression> rsql = pExpr.pa(rf.next);
                 Res<T2<String, List<Ast.Expression>>> rusing

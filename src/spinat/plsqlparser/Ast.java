@@ -255,6 +255,30 @@ public class Ast {
         }
     }
 
+    public static final class MultisetExpr extends Expression {
+
+        public final String what;
+        public final Expression e1;
+        public final Expression e2;
+
+        public MultisetExpr(String what, Expression e1, Expression e2) {
+            this.what = what;
+            this.e1 = e1;
+            this.e2 = e2;
+        }
+    }
+
+    public static final class ExtractDatePart extends Expression {
+
+        public final String what;
+        public final Expression expr;
+
+        public ExtractDatePart(String what, Expression expr) {
+            this.what = what;
+            this.expr = expr;
+        }
+    }
+
     public static final class VarOrCallExpression extends Expression {
 
         public final List<CallPart> callparts;
@@ -528,9 +552,9 @@ public class Ast {
 
         public final DataType datatype;
         public final boolean notnull;
-        public final T2<Integer,Integer> range;
+        public final T2<Integer, Integer> range;
 
-        public SubType(DataType datatype,T2<Integer,Integer> range, boolean notnull) {
+        public SubType(DataType datatype, T2<Integer, Integer> range, boolean notnull) {
             this.datatype = datatype;
             this.range = range;
             this.notnull = notnull;

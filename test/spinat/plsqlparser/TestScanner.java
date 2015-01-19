@@ -51,7 +51,8 @@ public class TestScanner {
         chk("1 q'[<script>]' 2", new String[]{"1", " ", "q'[<script>]'", " ", "2"});
         chk("1 $$bla 2", new String[]{"1", " ", "$$bla", " ", "2"});
         chk("1 \"a\"  2", new String[]{"1", " ", "\"a\"", "  ", "2"});
-        chk("\"$hits\" aaa_coverage_tool.bool_tab;",new String[]{"\"$hits\""," ","aaa_coverage_tool",".","bool_tab",";"});
-        chk("-1",new String[]{"-","1"});
+        chk("\"$hits\" aaa_coverage_tool.bool_tab;", new String[]{"\"$hits\"", " ", "aaa_coverage_tool", ".", "bool_tab", ";"});
+        chk("-1", new String[]{"-", "1"});
+        chk("[0]", new String[]{"[", "0", "]"});
     }
 }

@@ -284,6 +284,10 @@ public class Scanner {
                 return tok1(TokenType.LParen);
             case ')':
                 return tok1(TokenType.RParen);
+            case '[':
+                return tok1(TokenType.LBracket);
+            case ']':
+                return tok1(TokenType.RBracket);
             case '>':
                 return tok1(TokenType.Greater);
             case '<':
