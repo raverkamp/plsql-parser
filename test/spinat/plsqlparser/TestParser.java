@@ -169,6 +169,15 @@ public class TestParser {
     }
 
     @Test
+    public void testForall() {
+        Parser p = new Parser();
+        tpa(p.pStatement, " forall i in 1 ..y \n"
+                + "      insert into xxx(a,b)\n"
+                + "      select sss,jjj\n"
+                + "      from   kkkkk");
+    }
+
+    @Test
     public void testTypeDeclaration() {
         Parser p = new Parser();
         tpa(p.pDeclaration, "subtype a is integer RANGE 1 .. 2");
