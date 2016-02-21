@@ -13,7 +13,7 @@ public class Parser {
     static final List<String> badwords = Arrays.asList(new String[]{"insert", "update", "select", "declare", "loop", "end", "while",
         "begin", "null", "in", "out", "exception", "constant", "cursor",
         "pragma", "procedure", "function", "if", "for", "exception", "when", "elsif", "raise", "return", "else", "like",
-        "case", "table", "cast"});
+        "case", "table", "castx"});
 
     static final Combinator c = new Combinator();
 
@@ -23,6 +23,7 @@ public class Parser {
         }
     }
 
+    Pa<String> pkw_as = c.forkw("as");
     Pa<String> pkw_or = c.forkw("or");
     Pa<String> pkw_and = c.forkw("and");
     Pa<String> pkw_not = c.forkw("not");
@@ -569,6 +570,15 @@ public class Parser {
                 return new Res<Expression>(new Ast.NewExpression(r.v), r.next);
             }
 
+            if (s2.equalsIgnoreCase("cast")) {
+                Res<T3<String, Ast.Expression, String>> r = c.seq3(c.pPOpen, pExpr, pkw_as).pa(s.tail());
+                if (r != null) {
+                    Res<T2<Ast.DataType, String>> r2 = c.seq2(pDataType, c.pPClose).pa(r.next);
+                    must(r2, r.next, "expecting datatype and then ')'");
+                    return new Res<Expression>(new Ast.CastExpression(r.v.f2, r2.v.f1), r2.next);
+                }
+            }
+
         }
         return paVariableOrFunctionCall(s);
     }
@@ -878,10 +888,10 @@ public class Parser {
         {
             Res<String> a = pkw2_interval_day.pa(s);
             if (a != null) {
-              Res<Integer> dprec = paPrecOpt(a.next);
-              Res<String> b = c.mustp(c.forkw2("to", "second"), "expecting 'to second'").pa(dprec.next);
-              Res<Integer> sprec = paPrecOpt(b.next);
-              return new Res<Ast.DataType>(new Ast.IntervalDayToSecond(dprec.v,sprec.v),
+                Res<Integer> dprec = paPrecOpt(a.next);
+                Res<String> b = c.mustp(c.forkw2("to", "second"), "expecting 'to second'").pa(dprec.next);
+                Res<Integer> sprec = paPrecOpt(b.next);
+                return new Res<Ast.DataType>(new Ast.IntervalDayToSecond(dprec.v, sprec.v),
                         sprec.next);
             }
         }

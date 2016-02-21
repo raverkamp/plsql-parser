@@ -306,6 +306,16 @@ public class Ast {
             this.expr = expr;
         }
     }
+    
+    public static final class CastExpression extends Expression {
+        public final Expression expr;
+        public final DataType datatype;
+        
+        public CastExpression(Expression expr, DataType datatype) {
+            this.expr = expr;
+            this.datatype = datatype;
+        }
+    }
 
     public static final class VarOrCallExpression extends Expression {
 

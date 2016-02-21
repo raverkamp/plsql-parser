@@ -1,5 +1,8 @@
 package spinat.plsqlparser;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -24,13 +27,12 @@ public class TestParser {
         return new Seq(r);
     }
 
-    public void checkExpr(String s) {
+    public void tpa(Pa p, String s) {
         Seq seq = scan(s);
-        Parser p = new Parser();
-        Res<Ast.Expression> r = p.paExpr(seq);
+        Res r = p.pa(seq);
         assertNotNull(r);
-        System.out.println(r.next);
-        assertTrue(r.next.head().ttype == TokenType.TheEnd);
+        System.out.println(r.v);
+        assertTrue(r.next.head().ttype == TokenType.TheEnd || r.next.head().ttype == TokenType.Div);
     }
 
     @Test
@@ -46,34 +48,27 @@ public class TestParser {
 
     @Test
     public void test2() {
+        Parser p = new Parser();
+        tpa(p.pExpr, "a");
+        tpa(p.pExpr, "\"a\"");
+        tpa(p.pExpr, "a.b");
+        tpa(p.pExpr, "1+2");
+        tpa(p.pExpr, "1.9+0.8");
+        tpa(p.pExpr, "a(b)");
+        tpa(p.pExpr, "a+b");
+        tpa(p.pExpr, "a.i+b*x");
+        tpa(p.pExpr, "sin(a+k*10)");
+        tpa(p.pExpr, "12**88");
+        tpa(p.pExpr, "a%b");
+        tpa(p.pExpr, "a.b.c(f=>12 > 5) +4");
+        tpa(p.pExpr, "a.b.c(f=>12 > 5) + case 1 when 1 then 2 else 4 end");
+        tpa(p.pExpr, "case when 1 then 2 else 4 end");
+        tpa(p.pExpr, "date '2001-1-1'");
+        tpa(p.pExpr, "trunc(date '2001-1-1')");
+        tpa(p.pExpr, "-11*-8");
+        tpa(p.pExpr, "cast(a as timestamp)");
+        tpa(p.pExpr, "1+cast(a , timestamp)");
 
-        checkExpr("a");
-        checkExpr("\"a\"");
-        checkExpr("a.b");
-
-        checkExpr("a(b)");
-
-        checkExpr("a+b");
-        checkExpr("a.i+b*x");
-        checkExpr("sin(a+k*10)");
-        checkExpr("12**88");
-        checkExpr("a%b");
-        checkExpr("a.b.c(f=>12 > 5) +4");
-        checkExpr("a.b.c(f=>12 > 5) + case 1 when 1 then 2 else 4 end");
-        checkExpr("case when 1 then 2 else 4 end");
-        checkExpr("date '2001-1-1'");
-        checkExpr("trunc(date '2001-1-1')");
-        checkExpr("-11*-8");
-
-    }
-
-    public void tpa(Pa p, String s) {
-        Seq seq = scan(s);
-        Res r = p.pa(seq);
-        assertNotNull(r);
-        System.out.println(r.v);
-        //System.out.println(r.next);
-        assertTrue(r.next.head().ttype == TokenType.TheEnd || r.next.head().ttype == TokenType.Div);
     }
 
     @Test
@@ -126,7 +121,6 @@ public class TestParser {
         tpa(p.pDeclaration, "a interval day to second");
         tpa(p.pExpr, "sysdate + interval '1' hour");
         tpa(p.pExpr, "bla+0.1/(z+0.7)");
-
     }
 
     @Test
@@ -195,6 +189,7 @@ public class TestParser {
         tpa(p.pStatement, "loop null;  END LOOP bla");
         tpa(p.pStatement, "begin case bla when 'a' then null; else assa(1,2,3);  END CASE bla; end");
         tpa(p.pStatement, "begin case bla when 'a' then bla(77); else a:=x;  END CASE; end");
+        tpa(p.pStatement," l_returnvalue := to_char(l_time_utc, 'Dy, DD Mon YYYY HH24:MI:SS', 'NLS_DATE_LANGUAGE = AMERICAN') || ' GMT'");
     }
 
     @Test
@@ -213,6 +208,7 @@ public class TestParser {
         tpa(p.pDeclaration, "subtype a is integer RANGE 1 .. 2 not null");
         tpa(p.pDeclaration, "subtype a is integer RANGE -1 .. 2 not null");
         tpa(p.pDeclaration, "subtype a is integer not null");
+        tpa(p.pDeclaration, "subtype a is interval year(9) to month");
     }
 
     public void testPackage(String filename) {
@@ -225,5 +221,24 @@ public class TestParser {
         Parser p = new Parser();
         String s = Util.loadFile(filename);
         tpa(p.pCRPackageBody, s);
+    }
+
+    public void testFolder(String folder) throws IOException {
+        Path p = Paths.get(folder);
+        for (Path a : java.nio.file.Files.newDirectoryStream(p)) {
+            if (a.toString().endsWith(".pkb")) {
+                System.out.print("test: " + a);
+                testPackageBody(a.toString());
+            }
+            if (a.toString().endsWith(".pks")) {
+                System.out.print("test: " + a);
+                testPackage(a.toString());
+            }
+        }
+    }
+
+     @Test
+    public void testAlexandria() throws IOException {
+        testFolder("/home/roland/Documents/GitHub/plsql-parser/alexandria-ora");
     }
 }
