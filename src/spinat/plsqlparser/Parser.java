@@ -88,8 +88,12 @@ public class Parser {
     Pa<String> pkw_in_out = c.forkw2("in", "out");
     Pa<String> pkw_nocopy = c.forkw("nocopy");
     Pa<String> pkw_from = c.forkw("from");
+    Pa<String> pkw_to = c.forkw("to");
     // do not care about the string, what operators are there else?
     Pa pkw_multiset_union_all = c.seq2(c.forkw2("multiset", "union"), c.forkw("all"));
+
+    Pa<String> pkw2_interval_year = c.forkw2("interval", "year");
+    Pa<String> pkw2_interval_day = c.forkw2("interval", "day");
 
     Pa<Integer> pNatural = new Pa<Integer>() {
 
@@ -489,6 +493,7 @@ public class Parser {
         must(re, rp.next, "Expression expected");
         return new Res<Expression>(new Ast.BinopExpression(Ast.Binop.POWER, r.v, re.v), re.next);
     }
+
     /* 
      and pAtom s = orn [
      pNumber,
@@ -505,7 +510,6 @@ public class Parser {
      pCaseMatchExpr
      ] s
      */
-
     public Res<Expression> paAtomExpr(Seq s) {
         TokenType tt = s.head().ttype;
         if (tt == TokenType.Int || tt == TokenType.Float) {
@@ -554,11 +558,9 @@ public class Parser {
                 String sclean = sc.substring(1, sc.length() - 1);
                 return new Res<Expression>(new Ast.CString(sclean.replace("''", "'")), s.tail().tail());
             }
-            // interval '8' year|month|day|hour|minute|second is another expression of type date
-            if (s2.equalsIgnoreCase("interval") && s.tail().head().ttype == TokenType.String) {
-                String sc = s.tail().head().str;
-                String sclean = sc.substring(1, sc.length() - 1);
-                return new Res<Expression>(new Ast.CString(sclean.replace("''", "'")), s.tail().tail().tail());
+            Res<Expression> iexpr = paIntervalExpr(s);
+            if (iexpr != null) {
+                return iexpr;
             }
 
             if (s2.equalsIgnoreCase("new")) {
@@ -569,6 +571,85 @@ public class Parser {
 
         }
         return paVariableOrFunctionCall(s);
+    }
+
+    // parse a precision part, like in number(2,3) or number(4)
+    // the optional second part is defaulted to -1
+    Res<T2<Integer, Integer>> paPrecStuff(Seq s) {
+        Res r1 = c.pPOpen.pa(s);
+        if (r1 == null) {
+            return null;
+        }
+        Res<T2<Integer, T2<String, Integer>>> r2 = c.seq2(pNatural, c.opt(c.seq2(c.pComma, pNatural))).pa(r1.next);
+        Res r3 = c.mustp(c.pPClose, "expecting  a ')'").pa(r2.next);
+        int a1 = r2.v.f1;
+        int a2 = -1;
+        if (r2.v.f2 != null) {
+            a2 = r2.v.f2.f2;
+        }
+        return new Res<>(new T2<>(a1, a2), r3.next);
+    }
+
+    Res<T2<Ast.IntervalPart, T2<Integer, Integer>>> paIntervalpartMust(Seq s) {
+        if (s.head().ttype == TokenType.Ident) {
+            final Ast.IntervalPart ip;
+            switch (s.head().str.toLowerCase()) {
+                case "year":
+                    ip = Ast.IntervalPart.YEAR;
+                    break;
+                case "month":
+                    ip = Ast.IntervalPart.MONTH;
+                    break;
+                case "day":
+                    ip = Ast.IntervalPart.DAY;
+                    break;
+                case "hour":
+                    ip = Ast.IntervalPart.HOUR;
+                    break;
+                case "minute":
+                    ip = Ast.IntervalPart.MINUTE;
+                    break;
+                case "second":
+                    ip = Ast.IntervalPart.SECOND;
+                    break;
+                default:
+                    throw new ParseException("expecting year, month, day, hour, minute or second", s);
+            }
+            Res<T2<Integer, Integer>> r3 = paPrecStuff(s.tail());
+            final T2<Integer, Integer> prec;
+            final Seq s3;
+            if (r3 != null) {
+                s3 = r3.next;
+                prec = r3.v;
+            } else {
+                s3 = s.tail();
+                prec = null;
+            }
+            return new Res<T2<Ast.IntervalPart, T2<Integer, Integer>>>(new T2<Ast.IntervalPart, T2<Integer, Integer>>(ip, prec), s3);
+        }
+        throw new ParseException("expecting an interval part", s);
+    }
+
+    Res<Ast.IntervalTypeForExpr> paIntervalSpecMust(Seq s) {
+        Res<T2<Ast.IntervalPart, T2<Integer, Integer>>> r1 = paIntervalpartMust(s);
+        Res<String> r2 = pkw_to.pa(r1.next);
+        if (r2 == null) {
+            return new Res<>(new Ast.IntervalTypeForExpr(r1.v.f1, r1.v.f2, null, null), r1.next);
+        }
+        Res<T2<Ast.IntervalPart, T2<Integer, Integer>>> r3 = paIntervalpartMust(r2.next);
+        return new Res<>(new Ast.IntervalTypeForExpr(r1.v.f1, r1.v.f2, r3.v.f1, r3.v.f2), r3.next);
+    }
+
+    Res<Expression> paIntervalExpr(Seq s) {
+        if (s.head().ttype == TokenType.Ident
+                && s.head().str.equalsIgnoreCase("interval")
+                && s.tail().head().ttype == TokenType.String) {
+            String sc = s.tail().head().str;
+            Res<Ast.IntervalTypeForExpr> rt = paIntervalSpecMust(s.tail().tail());
+            return new Res<Ast.Expression>(new Ast.CInterval(sc, rt.v), rt.next);
+        } else {
+            return null;
+        }
     }
 
     Res<Expression> paCaseExpr(Seq s) {
@@ -773,6 +854,40 @@ public class Parser {
     //sep1(pIdent,tDot) s
     public final Pa<List<Ast.Ident>> pIdents = c.sep1(pIdent, c.pDot);
 
+    public Res<Integer> paPrecOpt(Seq s) {
+        if (c.pPOpen.pa(s) != null) {
+            Res<Integer> a = c.mustp(pNatural, "expecting natural").pa(s.tail());
+            Res<String> b = c.mustp(c.pPClose, "paren close").pa(a.next);
+            return new Res<>(a.v, b.next);
+        } else {
+            return new Res<>(null, s);
+        }
+    }
+
+    public Res<Ast.DataType> paIntervalDataType(Seq s) {
+
+        {
+            Res<String> a = pkw2_interval_year.pa(s);
+            if (a != null) {
+                Res<Integer> yprec = paPrecOpt(a.next);
+                Res<String> b = c.mustp(c.forkw2("to", "month"), "expecting 'to month'").pa(yprec.next);
+                return new Res<Ast.DataType>(new Ast.IntervalYearToMonth(yprec.v),
+                        b.next);
+            }
+        }
+        {
+            Res<String> a = pkw2_interval_day.pa(s);
+            if (a != null) {
+              Res<Integer> dprec = paPrecOpt(a.next);
+              Res<String> b = c.mustp(c.forkw2("to", "second"), "expecting 'to second'").pa(dprec.next);
+              Res<Integer> sprec = paPrecOpt(b.next);
+              return new Res<Ast.DataType>(new Ast.IntervalDayToSecond(dprec.v,sprec.v),
+                        sprec.next);
+            }
+        }
+        return null;
+    }
+
     public Res<Ast.DataType> paDataType(Seq s) {
         Res r1 = c.forkw2("timestamp", "with").pa(s);
         if (r1 != null) {
@@ -785,14 +900,9 @@ public class Parser {
         if (r2 != null) {
             return new Res<Ast.DataType>(new Ast.LongRaw(), r2.next);
         }
-        Res r2b = c.seq2(c.forkw2("interval", "year"), c.forkw2("to", "month")).pa(s);
+        Res<Ast.DataType> r2b = paIntervalDataType(s);
         if (r2b != null) {
-            return new Res<Ast.DataType>(new Ast.IntervalYearToMonth(), r2b.next);
-        }
-
-        Res r2c = c.seq2(c.forkw2("interval", "day"), c.forkw2("to", "second")).pa(s);
-        if (r2c != null) {
-            return new Res<Ast.DataType>(new Ast.IntervalDayToSecond(), r2c.next);
+            return r2b;
         }
 
         // parametrisierter typ varchar2, varchar ,raw, number

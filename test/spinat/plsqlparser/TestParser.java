@@ -1,4 +1,5 @@
 package spinat.plsqlparser;
+
 import java.util.ArrayList;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -108,6 +109,12 @@ public class TestParser {
         tpa(p.pDataType, "CHAR(1)");
         tpa(p.pDataType, "varchar2(1000 char)");
         tpa(p.pDataType, "varchar(1000 char)");
+        tpa(p.pDataType, "interval day to second");
+        tpa(p.pDataType, "interval year to month");
+        tpa(p.pDataType, "interval day(3) to second(4)");
+        tpa(p.pDataType, "interval year(9) to month");
+        tpa(p.pDataType, "interval");
+        tpa(p.pDataType, "\"INTERVAL\"");
 
         tpa(p.pItemDeclaration, "a b");
         tpa(p.pAndExpr, "ptFinLigne > 0");
@@ -116,10 +123,34 @@ public class TestParser {
         tpa(p.pExpr, "\"EXTRACT\"(year from sysdate)");
         tpa(p.pExpr, "extract(1,2,3)");
         tpa(p.pExpr, "a multiset union all b(c.d, e.f)");
-        tpa(p.pDeclaration,"a interval day to second");
+        tpa(p.pDeclaration, "a interval day to second");
         tpa(p.pExpr, "sysdate + interval '1' hour");
         tpa(p.pExpr, "bla+0.1/(z+0.7)");
 
+    }
+
+    @Test
+    public void testIntervals() {
+        Parser p = new Parser();
+        tpa(p.pExpr, "INTERVAL '4 5:12:10.222' DAY TO SECOND(3)");
+        tpa(p.pExpr, "INTERVAL '4 5:12' DAY TO MINUTE");
+        tpa(p.pExpr, "INTERVAL '400 5' DAY(3) TO HOUR");
+        tpa(p.pExpr, "INTERVAL '400' DAY(3)");
+        tpa(p.pExpr, "INTERVAL '11:12:10.2222222' HOUR TO SECOND(7)");
+        tpa(p.pExpr, "INTERVAL '11:20' HOUR TO MINUTE");
+        tpa(p.pExpr, "INTERVAL '10' HOUR	");
+        tpa(p.pExpr, "INTERVAL '10:22' MINUTE TO SECOND");
+        tpa(p.pExpr, "INTERVAL '10' MINUTE");
+        tpa(p.pExpr, "INTERVAL '4' DAY");
+        tpa(p.pExpr, "INTERVAL '25' HOUR	");
+        tpa(p.pExpr, "INTERVAL '40' MINUTE");
+        tpa(p.pExpr, "INTERVAL '120' HOUR(3)");
+        tpa(p.pExpr, "INTERVAL '30.12345' SECOND(2,4)");
+        tpa(p.pExpr, "INTERVAL '123-2' YEAR(3) TO MONTH");
+        tpa(p.pExpr, "INTERVAL '123' YEAR(3)");
+        tpa(p.pExpr, "INTERVAL '300' MONTH(3)");
+        tpa(p.pExpr, "INTERVAL '4' YEAR");
+        tpa(p.pExpr, "INTERVAL '50' MONTH");
     }
 
     @Test
