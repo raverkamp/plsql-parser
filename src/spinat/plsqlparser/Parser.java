@@ -508,7 +508,7 @@ public class Parser {
 
     public Res<Expression> paAtomExpr(Seq s) {
         TokenType tt = s.head().ttype;
-        if (tt == TokenType.Int) {
+        if (tt == TokenType.Int || tt == TokenType.Float) {
             return new Res<Expression>(new Ast.CNumber(new BigDecimal(s.head().str)), s.tail());
         }
         if (tt == TokenType.String) {
@@ -553,6 +553,12 @@ public class Parser {
                 String sc = s.tail().head().str;
                 String sclean = sc.substring(1, sc.length() - 1);
                 return new Res<Expression>(new Ast.CString(sclean.replace("''", "'")), s.tail().tail());
+            }
+            // interval '8' year|month|day|hour|minute|second is another expression of type date
+            if (s2.equalsIgnoreCase("interval") && s.tail().head().ttype == TokenType.String) {
+                String sc = s.tail().head().str;
+                String sclean = sc.substring(1, sc.length() - 1);
+                return new Res<Expression>(new Ast.CString(sclean.replace("''", "'")), s.tail().tail().tail());
             }
 
             if (s2.equalsIgnoreCase("new")) {

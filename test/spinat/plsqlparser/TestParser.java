@@ -1,9 +1,4 @@
 package spinat.plsqlparser;
-
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -121,6 +116,9 @@ public class TestParser {
         tpa(p.pExpr, "\"EXTRACT\"(year from sysdate)");
         tpa(p.pExpr, "extract(1,2,3)");
         tpa(p.pExpr, "a multiset union all b(c.d, e.f)");
+        tpa(p.pDeclaration,"a interval day to second");
+        tpa(p.pExpr, "sysdate + interval '1' hour");
+        tpa(p.pExpr, "bla+0.1/(z+0.7)");
 
     }
 
@@ -196,44 +194,5 @@ public class TestParser {
         Parser p = new Parser();
         String s = Util.loadFile(filename);
         tpa(p.pCRPackageBody, s);
-    }
-
-    @Test
-    public void test5() {
-        testPackage("c:/users/rav/documents/plsql-repo/PL_FPDF.pks");
-        testPackage("c:/users/rav/documents/plsql-repo/logger.pks");
-        testPackage("c:/users/rav/documents/plsql-repo/excp.pks");
-        testPackage("c:/users/rav/documents/plsql-repo/io.pks");
-        testPackage("c:/users/rav/documents/plsql-repo/env.pks");
-    }
-
-    @Test
-    public void test6() {
-        testPackageBody("c:/users/rav/documents/plsql-repo/plog.pkb");
-        testPackageBody("c:/users/rav/documents/plsql-repo/plog_out_dbms_output.pkb");
-    }
-
-    @Test
-    public void test7() throws Exception {
-        Path dir = Paths.get("c:/users/rav/documents/plsql-repo/demo_feuerstein");
-        try (DirectoryStream<Path> stream
-                = Files.newDirectoryStream(dir, "*.pks")) {
-            for (Path entry : stream) {
-                System.out.println(entry.getFileName());
-                testPackage(dir.resolve(entry).toString());
-            }
-        }
-    }
-
-    @Test
-    public void test8() throws Exception {
-        Path dir = Paths.get("c:/users/rav/documents/plsql-repo/demo_feuerstein");
-        try (DirectoryStream<Path> stream
-                = Files.newDirectoryStream(dir, "*.pkb")) {
-            for (Path entry : stream) {
-                System.out.println(entry.getFileName());
-                testPackageBody(dir.resolve(entry).toString());
-            }
-        }
     }
 }
