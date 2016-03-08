@@ -24,7 +24,7 @@ public class Ast {
         CREATE, CREATE_OR_REPLACE
     }
 
-    public static abstract class Expression {
+    public static abstract class Expression extends Ranged{
     };
 
     public static class ActualParam {
@@ -334,13 +334,19 @@ public class Ast {
             this.callparts = callparts;
         }
     }
+    
+    //%FOUND, %ISOPEN %NOTFOUND, and %ROWCOUNT. %BULK_ROWCOUNT,
+    
+     public static enum Attribute {
+        FOUND, ISOPEN, NOTFOUND, ROWCOUNT, BULK_ROWCOUNT
+    }
 
     public static final class SqlAttribute extends Expression {
 
-        public final List<CallPart> attrs;
+        public final Attribute attribute;
 
-        public SqlAttribute(List<CallPart> attrs) {
-            this.attrs = attrs;
+        public SqlAttribute(Attribute attribute) {
+            this.attribute = attribute;
         }
     }
 

@@ -146,6 +146,12 @@ public class TestParser {
         tpa(p.pExpr, "INTERVAL '4' YEAR");
         tpa(p.pExpr, "INTERVAL '50' MONTH");
     }
+    @Test
+    public void testsqlAttributes() {
+       Parser p = new Parser(); 
+       tpa(p.pExpr,"1+2*(sql%rowcount +90)");  
+       tpa(p.pExpr,"1+2*(sql%\"ROWCOUNT\" +90)");  
+    }
 
     @Test
     public void test4() {

@@ -710,10 +710,24 @@ public class Parser {
 
     Res<Expression> paSQLAttribute(Seq s) {
         Res<String> r1 = c.forkw("sql").pa(s);
-        Res<String> r2 = c.pPercent.pa(r1.next);
-        // fixme : quoted allowed
-        Res<List<Ast.CallPart>> rcp = paCallParts(r2.next);
-        return new Res<Expression>(new Ast.SqlAttribute(rcp.v), rcp.next);
+        Res<String> r2 = c.mustp(c.pPercent,"expecting %").pa(r1.next);
+        Res<Ast.Ident> r3 = c.mustp(pIdent,"expecting an identifier").pa(r2.next);
+        String as = r3.v.val;
+        final Ast.Attribute a;
+        if (as.equals("NOTFOUND")) {
+            a = Ast.Attribute.NOTFOUND;
+        } else if (as.equals("FOUND"))
+                a = Ast.Attribute.FOUND;
+        else if (as.equals(("ROWCOUNT"))) {
+            a= Ast.Attribute.ROWCOUNT;
+        } else if (as.equals(pIdent)) {
+            a = Ast.Attribute.BULK_ROWCOUNT;
+        } else if (as.equals("ISOPEN")) {
+            a= Ast.Attribute.ISOPEN;
+        } else {
+            throw new ParseException("Expecting a valid cursor attribute, not " + as, r2.next);
+        }
+        return new Res<Expression>(new Ast.SqlAttribute(a), r3.next);
     }
 
     Pa<Ast.LValue> pLValue = new Pa<Ast.LValue>() {
