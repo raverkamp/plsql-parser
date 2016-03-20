@@ -19,7 +19,7 @@ public class Scanner {
     }
 
     char get(int x) {
-        if (x > len) {
+        if (x >= len) {
             throw new RuntimeException("unexpcted end of source");
         } else {
             return source.charAt(x);
@@ -165,7 +165,7 @@ public class Scanner {
                 ende = '>';
                 break;
             case '\'':
-                throw new ScanException("' an not be ende of q string");
+                throw new ScanException("' can not be end of q string");
             default:
                 ende = get(pos + 2);
         }
@@ -265,16 +265,6 @@ public class Scanner {
         return tokx(what, this.start + 1);
     }
 
-
-    /*fun tokx what next =
-     let val (linen,coln)=advPos(line,col,start,next)
-     in
-     ({ttype= what, pos=start,ipos=istart, 
-     str= substring(str,start,next-start),
-     line=line,col=col},next,linen,coln)
-     end
- 
-     */
     Token check1() {
         char c = get(start);
         switch (c) {
@@ -324,7 +314,7 @@ public class Scanner {
                 } else if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') {
                     return tokx(TokenType.Ident, scanIdent(this.start));
                 } else {
-                    throw new ScanException("unhandled char: " + c + " at line" + this.line);
+                    throw new ScanException("unhandled char: " + c + " at line " + this.line);
                 }
         }
     }
