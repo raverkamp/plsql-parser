@@ -146,11 +146,12 @@ public class TestParser {
         tpa(p.pExpr, "INTERVAL '4' YEAR");
         tpa(p.pExpr, "INTERVAL '50' MONTH");
     }
+
     @Test
     public void testsqlAttributes() {
-       Parser p = new Parser(); 
-       tpa(p.pExpr,"1+2*(sql%rowcount +90)");  
-       tpa(p.pExpr,"1+2*(sql%\"ROWCOUNT\" +90)");  
+        Parser p = new Parser();
+        tpa(p.pExpr, "1+2*(sql%rowcount +90)");
+        tpa(p.pExpr, "1+2*(sql%\"ROWCOUNT\" +90)");
     }
 
     @Test
@@ -195,7 +196,7 @@ public class TestParser {
         tpa(p.pStatement, "loop null;  END LOOP bla");
         tpa(p.pStatement, "begin case bla when 'a' then null; else assa(1,2,3);  END CASE bla; end");
         tpa(p.pStatement, "begin case bla when 'a' then bla(77); else a:=x;  END CASE; end");
-        tpa(p.pStatement," l_returnvalue := to_char(l_time_utc, 'Dy, DD Mon YYYY HH24:MI:SS', 'NLS_DATE_LANGUAGE = AMERICAN') || ' GMT'");
+        tpa(p.pStatement, " l_returnvalue := to_char(l_time_utc, 'Dy, DD Mon YYYY HH24:MI:SS', 'NLS_DATE_LANGUAGE = AMERICAN') || ' GMT'");
     }
 
     @Test
@@ -205,6 +206,33 @@ public class TestParser {
                 + "      insert into xxx(a,b)\n"
                 + "      select sss,jjj\n"
                 + "      from   kkkkk");
+    }
+
+    @Test
+    public void testForallVal() {
+        Parser p = new Parser();
+        tpa(p.pStatement, "forall j in values of tab\n"
+                + "   update atable\n"
+                + "   set y = tab(j)\n"
+                + "   where x = tab(j)");
+    }
+
+    @Test
+    public void testForallInd() {
+        Parser p = new Parser();
+        tpa(p.pStatement, "forall j in indices of tab\n"
+                + "   update atable\n"
+                + "   set y = tab(j)\n"
+                + "   where x = tab(j)");
+    }
+    
+    @Test
+    public void testForallInd2() {
+        Parser p = new Parser();
+        tpa(p.pStatement, "forall j in indices of tab between 12 and z*9 \n"
+                + "   update atable\n"
+                + "   set y = tab(j)\n"
+                + "   where x = tab(j)");
     }
 
     @Test
@@ -243,7 +271,7 @@ public class TestParser {
         }
     }
 
-     @Test
+    @Test
     public void testAlexandria() throws IOException {
         testFolder("/home/roland/Documents/GitHub/plsql-parser/alexandria-ora");
     }
