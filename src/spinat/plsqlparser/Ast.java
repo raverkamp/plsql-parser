@@ -1258,6 +1258,28 @@ public class Ast {
             this.to = to;
         }
     }
+    
+    public static class ValuesBounds extends BoundsClause {
+    	
+    	public final Expression collection;
+    	
+    	public ValuesBounds(Expression collection) {
+    		this.collection = collection;
+    	}
+    }
+    
+    public static class IndicesBounds extends BoundsClause {
+    	
+    	public final Expression idx_collection;
+    	public final Expression lower;
+    	public final Expression upper;
+    	
+    	public IndicesBounds(Expression idx_collection, Expression lower, Expression upper) {
+    		this.idx_collection = idx_collection;
+    		this.lower = lower;
+    		this.upper = upper;
+    	}
+    }
 
     /*| ForAllStatement of ident * bounds_clause *  (Tokens.token list)*/
     public static class ForAllStatement extends Statement {
