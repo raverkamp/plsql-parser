@@ -95,6 +95,8 @@ public class Parser {
 
     Pa<String> pkw2_interval_year = c.forkw2("interval", "year");
     Pa<String> pkw2_interval_day = c.forkw2("interval", "day");
+    Pa<String> pkw2_values_of = c.forkw2("values", "of");
+    Pa<String> pkw2_indices_of = c.forkw2("indices", "of");
 
     Pa<Integer> pNatural = new Pa<Integer>() {
 
@@ -1978,6 +1980,26 @@ public class Parser {
         }
         Res<Ast.Ident> rident = pIdent.pa(r.next);
         Res rin = pkw_in.pa(rident.next);
+        Res rvo = pkw2_values_of.pa(rin.next);
+        if (rvo != null) {
+        	Res<Ast.Expression> rc = pExpr.pa(rvo.next);
+        	Res<List<Token>> rsql = paBalancedParenAndNoSemi(rc.next);
+        	return new Res<Ast.Statement>(new Ast.ForAllStatement(rident.v, new Ast.ValuesBounds(rc.v), rsql.v), rsql.next);
+        }
+        Res rio = pkw2_indices_of.pa(rin.next);
+        if (rio != null) {
+        	Res<Ast.Expression> rc1 = pExpr.pa(rio.next);
+        	Res<String> rb = pkw_between.pa(rc1.next);
+            if (rb == null) {
+            	Res<List<Token>> rsql = paBalancedParenAndNoSemi(rc1.next);
+            	return new Res<Ast.Statement>(new Ast.ForAllStatement(rident.v, new Ast.IndicesBounds(rc1.v, null, null), rsql.v), rsql.next);
+            }
+            Res<Expression> re1 = pExpr.pa(rb.next);
+            Res<String> rand = pkw_and.pa(re1.next);
+            Res<Expression> re2 = pExpr.pa(rand.next);
+            Res<List<Token>> rsql = paBalancedParenAndNoSemi(re2.next);
+            return new Res<Ast.Statement>(new Ast.ForAllStatement(rident.v, new Ast.IndicesBounds(rc1.v, re1.v, re2.v), rsql.v), rsql.next);
+        }
         Res<T3<Ast.Expression, String, Ast.Expression>> rbounds = c.seq3(pExpr, c.pDotDot, pExpr).pa(rin.next);
         Res<List<Token>> rsql = paBalancedParenAndNoSemi(rbounds.next);
         return new Res<Ast.Statement>(new Ast.ForAllStatement(rident.v, new Ast.FromToBounds(rbounds.v.f1, rbounds.v.f3), rsql.v), rsql.next);
