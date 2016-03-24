@@ -712,20 +712,20 @@ public class Parser {
 
     Res<Expression> paSQLAttribute(Seq s) {
         Res<String> r1 = c.forkw("sql").pa(s);
-        Res<String> r2 = c.mustp(c.pPercent,"expecting %").pa(r1.next);
-        Res<Ast.Ident> r3 = c.mustp(pIdent,"expecting an identifier").pa(r2.next);
+        Res<String> r2 = c.mustp(c.pPercent, "expecting %").pa(r1.next);
+        Res<Ast.Ident> r3 = c.mustp(pIdent, "expecting an identifier").pa(r2.next);
         String as = r3.v.val;
         final Ast.Attribute a;
         if (as.equals("NOTFOUND")) {
             a = Ast.Attribute.NOTFOUND;
-        } else if (as.equals("FOUND"))
-                a = Ast.Attribute.FOUND;
-        else if (as.equals(("ROWCOUNT"))) {
-            a= Ast.Attribute.ROWCOUNT;
+        } else if (as.equals("FOUND")) {
+            a = Ast.Attribute.FOUND;
+        } else if (as.equals(("ROWCOUNT"))) {
+            a = Ast.Attribute.ROWCOUNT;
         } else if (as.equals(pIdent)) {
             a = Ast.Attribute.BULK_ROWCOUNT;
         } else if (as.equals("ISOPEN")) {
-            a= Ast.Attribute.ISOPEN;
+            a = Ast.Attribute.ISOPEN;
         } else {
             throw new ParseException("Expecting a valid cursor attribute, not " + as, r2.next);
         }
@@ -1979,20 +1979,21 @@ public class Parser {
             return null;
         }
         Res<Ast.Ident> rident = pIdent.pa(r.next);
+        must(rident, r.next, "expecting identifier");
         Res rin = pkw_in.pa(rident.next);
         Res rvo = pkw2_values_of.pa(rin.next);
         if (rvo != null) {
-        	Res<Ast.Expression> rc = pExpr.pa(rvo.next);
-        	Res<List<Token>> rsql = paBalancedParenAndNoSemi(rc.next);
-        	return new Res<Ast.Statement>(new Ast.ForAllStatement(rident.v, new Ast.ValuesBounds(rc.v), rsql.v), rsql.next);
+            Res<Ast.Expression> rc = pExpr.pa(rvo.next);
+            Res<List<Token>> rsql = paBalancedParenAndNoSemi(rc.next);
+            return new Res<Ast.Statement>(new Ast.ForAllStatement(rident.v, new Ast.ValuesBounds(rc.v), rsql.v), rsql.next);
         }
         Res rio = pkw2_indices_of.pa(rin.next);
         if (rio != null) {
-        	Res<Ast.Expression> rc1 = pExpr.pa(rio.next);
-        	Res<String> rb = pkw_between.pa(rc1.next);
+            Res<Ast.Expression> rc1 = pExpr.pa(rio.next);
+            Res<String> rb = pkw_between.pa(rc1.next);
             if (rb == null) {
-            	Res<List<Token>> rsql = paBalancedParenAndNoSemi(rc1.next);
-            	return new Res<Ast.Statement>(new Ast.ForAllStatement(rident.v, new Ast.IndicesBounds(rc1.v, null, null), rsql.v), rsql.next);
+                Res<List<Token>> rsql = paBalancedParenAndNoSemi(rc1.next);
+                return new Res<Ast.Statement>(new Ast.ForAllStatement(rident.v, new Ast.IndicesBounds(rc1.v, null, null), rsql.v), rsql.next);
             }
             Res<Expression> re1 = pExpr.pa(rb.next);
             Res<String> rand = pkw_and.pa(re1.next);
