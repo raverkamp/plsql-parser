@@ -16,6 +16,6 @@ public class T4<A, B, C, D> {
 
     @Override
     public String toString() {
-        return "<" + this.f1 + ", " + this.f2 + ", " + this.f3 + ">";
+        return "<" + this.f1 + ", " + this.f2 + ", " + this.f3 + ", " + this.f4 + ">";
     }
 }

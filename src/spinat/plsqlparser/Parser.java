@@ -2012,9 +2012,10 @@ public class Parser {
         Res<Ast.Ident> rident = pIdent.pa(r.next);
         Res rin = pkw_in.pa(rident.next);
         {
-            Res resel = c.seq2(c.pPOpen, pkw_select).pa(rin.next);
+            Res<List<String>> reopen = c.many(c.pPOpen).pa(rin.next);
+            Res<String> resel = pkw_select.pa(reopen.next);
             if (resel == null) {
-                resel = c.seq2(c.pPOpen, pkw_with).pa(rin.next);
+                resel = pkw_with.pa(reopen.next);
             }
             if (resel != null) {
                 // skip the starting paren !
