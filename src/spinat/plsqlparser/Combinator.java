@@ -224,6 +224,7 @@ public class Combinator {
                     if (rr2 == null) {
                         throw new ParseException("expecteing one more thing", rr.next);
                     }
+                    l.add(rr2.v);
                     s = rr2.next;
                 }
             }

@@ -236,6 +236,15 @@ public class TestParser {
     }
 
     @Test
+    public void testForLoopManyParens() {
+        Parser p = new Parser();
+        tpa(p.pStatement, "for j in (select a,b,c from t1 union all select a,b,c from t2) loop null; end loop");
+        tpa(p.pStatement, "for j in ((select a,b,c from t1) union all select a,b,c from t2) loop null; end loop");
+        tpa(p.pStatement, "for j in (select a,b,c from t1 union all (select a,b,c from t2)) loop null; end loop");
+        tpa(p.pStatement, "for j in ((select a,b,c from t1 union all select a,b,c from t2)) loop null; end loop");
+    }
+    
+    @Test
     public void testTypeDeclaration() {
         Parser p = new Parser();
         tpa(p.pDeclaration, "subtype a is integer RANGE 1 .. 2");
