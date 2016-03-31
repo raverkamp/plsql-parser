@@ -97,6 +97,7 @@ public class Parser {
     Pa<String> pkw2_interval_day = c.forkw2("interval", "day");
     Pa<String> pkw2_values_of = c.forkw2("values", "of");
     Pa<String> pkw2_indices_of = c.forkw2("indices", "of");
+    Pa<String> pkw2_lock_table = c.forkw2("lock", "table");
 
     Pa<Integer> pNatural = new Pa<Integer>() {
 
@@ -1787,6 +1788,9 @@ public class Parser {
                 // that with is not a procedure or variable name 
                 case "with": // with q as (select * from dual) select dummy fromdual into bla from q:
                     return paSQLStatement(s);
+
+                case "lock": /*lock table*/
+                    return paLockTableStatement(s);
             }
         }
         return paAssignOrCallStatement(s);
@@ -2342,6 +2346,44 @@ public class Parser {
         }
     }
 
+    public Res<Ast.Statement> paLockTableStatement(Seq s) {
+        Res<String> r = pkw2_lock_table.pa(s);
+        if (r == null) {
+            return null;
+        }
+        Res<List<Ast.Ident>> r1 = c.sep(pIdent, c.pComma).pa(r.next);
+        Res<String> r2 = pkw_in.pa(r1.next);
+        Res<String> r3 = c.until(c.forkw("mode"), 3).pa(r2.next);
+        if (r3 == null) {
+            return null;
+        }
+        final Ast.LockMode mode;
+        switch (r3.v) {
+            case "row_share":
+                mode = Ast.LockMode.ROW_SHARE;
+                break;
+            case "row_exclusive":
+                mode = Ast.LockMode.ROW_EXCLUSIVE;
+                break;
+            case "share_update":
+                mode = Ast.LockMode.SHARE_UPDATE;
+                break;
+            case "share":
+                mode = Ast.LockMode.SHARE;
+                break;
+            case "share_row_exclusive":
+                mode = Ast.LockMode.SHARE_ROW_EXCLUSIVE;
+                break;
+            case "exclusive":
+                mode = Ast.LockMode.EXCLUSIVE;
+                break;
+            default:
+                throw new RuntimeException("unknown lock mode");
+        }
+        Res<Boolean> r4 = c.bopt(c.forkw("nowait")).pa(r3.next);
+        return new Res<Ast.Statement>(new Ast.LockTableStatement(r1.v, mode, r4.v), r4.next);
+    }
+    
     /*
      and pProcedureDefinitionOrDeclaration s =
      bind(pProcedureHeading,
