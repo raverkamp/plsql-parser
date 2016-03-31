@@ -254,6 +254,17 @@ public class TestParser {
         tpa(p.pDeclaration, "subtype a is interval year(9) to month");
     }
 
+    @Test
+    public void testLockTable() {
+        Parser p = new Parser();
+        tpa(p.pStatement, "lock table a in share mode nowait");
+        tpa(p.pStatement, "lock table a,b,c in share update mode");
+        tpa(p.pStatement, "lock table a,b,c in row share mode nowait");
+        tpa(p.pStatement, "lock table a,b,c in row exclusive mode");
+        tpa(p.pStatement, "lock table a,b,c in exclusive mode");
+        tpa(p.pStatement, "lock table a in share row exclusive mode");
+    }
+    
     public void testPackage(String filename) {
         Parser p = new Parser();
         String s = Util.loadFile(filename);

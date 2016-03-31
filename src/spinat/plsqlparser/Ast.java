@@ -1320,6 +1320,23 @@ public class Ast {
         }
     }
 
+    public static class LockTableStatement extends Statement {
+
+        public final List<Ast.Ident> locktables;
+        public final Ast.LockMode lockmode;
+        public final Boolean isnowait;
+        
+        public LockTableStatement (
+                List<Ast.Ident> locktables,
+                Ast.LockMode lockmode,
+                Boolean isnowait
+                ) {
+            this.locktables = locktables;
+            this.lockmode = lockmode;
+            this.isnowait = isnowait;
+        }
+    }
+
     public static class PackageBody {
 
         public final ObjectName name;
@@ -1337,6 +1354,15 @@ public class Ast {
         }
     }
 
+    public static enum LockMode {
+        ROW_SHARE, 
+        ROW_EXCLUSIVE, 
+        SHARE_UPDATE, 
+        SHARE, 
+        SHARE_ROW_EXCLUSIVE,
+        EXCLUSIVE
+    }
+    
     //OpenStaticRefCursorStatement of ident list * (Tokens.token list)
     //         | OpenDynamicRefCursorStatement of ident list * expression * expression list
 

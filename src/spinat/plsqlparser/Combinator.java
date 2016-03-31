@@ -341,4 +341,28 @@ public class Combinator {
     public <X> Pa<X> or2(Pa<X> p1, Pa<X> p2) {
         return orn(new Pa[]{p1, p2});
     }
+
+    public <X> Pa<String> until(final Pa<X> p, final int limit) {
+        
+        return new Pa<String>() {
+
+            @Override
+            public Res<String> par(Seq s) {
+                Seq s0 = s;
+                String x = "";
+                int count = limit;
+                while (true) {
+                    Res<X> r = p.pa(s0);
+                    if (r == null) {
+                        count--;
+                        x = x + s0.head().str.toLowerCase() + "_";
+                        if (count == -1) return null;
+                        s0 = s0.tail();
+                    } else {
+                        return new Res<String>(x.substring(0, x.length() > 0 ? x.length() - 1 : 0), r.next);
+                    }
+                }
+            }
+        };
+    }
 }
