@@ -19,7 +19,8 @@ public class Parser {
 
     static void must(Res r, Seq s, String msg) {
         if (r == null) {
-            throw new ParseException("can not parse: " + msg, s);
+            // this is the same as in Combinator.mustp
+            throw new ParseException(msg, s);
         }
     }
 
@@ -321,7 +322,7 @@ public class Parser {
         }
         Res<String> r3 = c.opt(pkw_not).pa(r2.next);
         Res<Expression> r4 = paLikeExpr(r3.next);
-        must(r4, r3.next, "expression");
+        must(r4, r3.next, "expecting an expression");
         return new Res<Expression>(new Ast.IsNullExpr(r4.v, r2.v != null), r4.next);
 
     }
@@ -337,13 +338,13 @@ public class Parser {
             return r;
         }
         Res<Expression> r3 = paBetweenExpr(r2.next);
-        must(r3, r2.next, "expression");
+        must(r3, r2.next, "expecting an expression");
         Res<String> r4 = c.forkw("escape").pa(r3.next);
         if (r4 == null) {
             return new Res<Expression>(new Ast.LikeExpression(r.v, r3.v, null, rnot.v), r3.next);
         } else {
             Res<Expression> r5 = paBetweenExpr(r4.next);
-            must(r5, r4.next, "expression");
+            must(r5, r4.next, "expecting an expression");
             return new Res<Expression>(new Ast.LikeExpression(r.v, r3.v, r5.v, rnot.v), r5.next);
         }
     }
@@ -723,7 +724,7 @@ public class Parser {
                 trim_char = new Ast.CString(" ");
             }
             Res<Expression> rs = paAtomExpr(r3.next);
-            Res<String> rc = c.mustp(c.pPClose, "expect ')'").pa(rs.next);
+            Res<String> rc = c.mustp(c.pPClose, "expecting a ')'").pa(rs.next);
             trim_source = rs.v;
             next = rc.next;
         } else {
@@ -736,7 +737,7 @@ public class Parser {
             } else {
                 trim_char = r5.v;
                 Res<Expression> r8 = paAtomExpr(r6.next);
-                Res<String> rc = c.mustp(c.pPClose, "expect ')'").pa(r8.next);
+                Res<String> rc = c.mustp(c.pPClose, "expecting a ')'").pa(r8.next);
                 trim_source = r8.v;
                 next = rc.next;
             }
@@ -782,7 +783,7 @@ public class Parser {
             ss = rd.next;
         }
         Res<String> r4 = pkw_end.pa(ss);
-        must(r4, ss, "expecting and END");
+        must(r4, ss, "expecting an END");
         if (em == null) {
             return new Res<Expression>(new Ast.CaseBoolExpression(l, defaultt), r4.next);
         } else {
@@ -834,7 +835,7 @@ public class Parser {
         while (true) {
             Res rdot = c.pDot.pa(next);
             if (rdot != null) {
-                Res<Ast.Ident> rident2 = c.mustp(pIdent, "ident").pa(rdot.next);
+                Res<Ast.Ident> rident2 = c.mustp(pIdent, "expecting an ident").pa(rdot.next);
                 l.add(new Ast.Component(rident2.v));
                 next = rident2.next;
                 continue;
@@ -872,8 +873,8 @@ public class Parser {
             return null;
         }
         // from here comitted
-        Res<Ast.Expression> r5 = c.mustp(pExpr, "expression").pa(r4.next);
-        Res r6 = c.mustp(c.pPClose, "close paren").pa(r5.next);
+        Res<Ast.Expression> r5 = c.mustp(pExpr, "expecting an expression").pa(r4.next);
+        Res r6 = c.mustp(c.pPClose, "expecting a ')'").pa(r5.next);
         return new Res<Expression>(new Ast.ExtractDatePart(r3.v.toUpperCase(), r5.v), r6.next);
     }
 
@@ -962,8 +963,8 @@ public class Parser {
 
     public Res<Integer> paPrecOpt(Seq s) {
         if (c.pPOpen.pa(s) != null) {
-            Res<Integer> a = c.mustp(pNatural, "natural").pa(s.tail());
-            Res<String> b = c.mustp(c.pPClose, "paren close").pa(a.next);
+            Res<Integer> a = c.mustp(pNatural, "expecting a natural").pa(s.tail());
+            Res<String> b = c.mustp(c.pPClose, "expecting a ')'").pa(a.next);
             return new Res<>(a.v, b.next);
         } else {
             return new Res<>(null, s);
@@ -976,7 +977,7 @@ public class Parser {
             Res<String> a = pkw2_interval_year.pa(s);
             if (a != null) {
                 Res<Integer> yprec = paPrecOpt(a.next);
-                Res<String> b = c.mustp(c.forkw2("to", "month"), "'to month'").pa(yprec.next);
+                Res<String> b = c.mustp(c.forkw2("to", "month"), "expecting 'to month'").pa(yprec.next);
                 return new Res<Ast.DataType>(new Ast.IntervalYearToMonth(yprec.v),
                         b.next);
             }
@@ -1105,7 +1106,7 @@ public class Parser {
                 return null;
             }
             // fixme check for current_user or definer
-            return c.mustp(justkw, "some word").pa(r.next);
+            return c.mustp(justkw, "expecting some word").pa(r.next);
         }
     };
 
@@ -1228,7 +1229,7 @@ public class Parser {
                     if (r2 == null) {
                         return new Res<Ast.TypeDefinition>(new Ast.RefCursorType(null), r.next);
                     } else {
-                        Res<Ast.DataType> r3 = c.mustp(pDataType, "datatype").pa(r2.next);
+                        Res<Ast.DataType> r3 = c.mustp(pDataType, "expecting datatype").pa(r2.next);
                         return new Res<Ast.TypeDefinition>(new Ast.RefCursorType(r3.v), r3.next);
                     }
                 }
@@ -1247,7 +1248,7 @@ public class Parser {
                 return null;
             }
             Res<T2<Ast.DataType, Boolean>> r2 = c.seq2(pDataType, c.bopt(pNotNull)).pa(r.next);
-            must(r2, r.next, "datatype");
+            must(r2, r.next, "expecting datatype");
             Res<T3<String, String, Ast.DataType>> r3 = c.seq3(pkw_index, pkw_by, pDataType).pa(r2.next);
             if (r3 == null) {
                 return new Res<Ast.TypeDefinition>(new Ast.TableSimple(r2.v.f1, r2.v.f2), r2.next);
@@ -1278,7 +1279,7 @@ public class Parser {
         if (r == null) {
             return null;
         }
-        Res<T2<Ast.Ident, String>> ris = c.mustp(c.seq2(pIdent, pkw_is), "expecting 'bla is'").pa(r.next);
+        Res<T2<Ast.Ident, String>> ris = c.mustp(c.seq2(pIdent, pkw_is), "expecting '<type> is'").pa(r.next);
         Seq next = ris.next;
         Ast.Ident name = ris.v.f1;
         Res<Ast.TypeDefinition> r1 = pRecordTypeDefinition.pa(next);
@@ -1310,7 +1311,7 @@ public class Parser {
                 return new Res<>(null, s);
             }
             Res<T3<Integer, String, Integer>> r2 = c.seq3(pInteger, c.pDotDot, pInteger).pa(r.next);
-            must(r2, r.next, "expectint int .. int ");
+            must(r2, r.next, "expecting int .. int ");
             return new Res<>(new T2<Integer, Integer>(r2.v.f1, r2.v.f3), r2.next);
         }
     };
@@ -1413,7 +1414,7 @@ public class Parser {
             return null;
         }
         Res<Ast.Ident> r2 = pIdent.pa(r.next);
-        must(r2, r.next, "ident");
+        must(r2, r.next, "expecting ident");
         Res<List<Ast.Parameter>> r3 = c.withParensCommit(c.sep1(pParameter, c.pComma), r2.next);
         List<Ast.Parameter> params;
         Seq next;
@@ -1507,7 +1508,7 @@ public class Parser {
         Res r3 = pkw_default.pa(r2.next);
         if (r3 == null) {
             Res<Ast.Ident> r4 = pIdent.pa(r2.next);
-            must(r4, r2.next, "expecting ident");
+            must(r4, r2.next, "expecting an ident");
             ident = r4.v;
             next = r4.next;
         } else {
@@ -1515,9 +1516,9 @@ public class Parser {
             next = r3.next;
         }
         Res r5 = c.pComma.pa(next);
-        must(r5, next, "expecting ,");
+        must(r5, next, "expecting a ','");
         Res<List<String>> r6 = c.sep1(pRestrictReferencesMode, c.pComma).pa(r5.next);
-        must(r6, r5.next, "at least one mode");
+        must(r6, r5.next, "expecting at least one mode");
         Res r7 = c.pPClose.pa(r6.next);
         must(r7, r6.next, "expecting paren close");
         return new Res<Ast.Declaration>(new Ast.PragmaRestrictReferences(ident, ident == null, r6.v), r7.next);
@@ -1724,7 +1725,7 @@ public class Parser {
             if (r == null) {
                 return new Res<>(res, seq);
             }
-            Res rs = c.mustp(c.pSemi, "expecting a ;").pa(r.next);
+            Res rs = c.mustp(c.pSemi, "expecting a ';'").pa(r.next);
             res.add(r.v);
             seq = rs.next;
         }
@@ -1749,10 +1750,10 @@ public class Parser {
             return null;
         }
         Res<String> ric = c.opt(pInvokerClause).pa(ro.next);
-        Res<String> risas = c.mustp(pIsOrAs, "is or as").pa(ric.next);
+        Res<String> risas = c.mustp(pIsOrAs, "expecting 'is' or 'as'").pa(ric.next);
         Res<List<Ast.Declaration>> rde = paDeclarations(risas.next);
         Res<T3<String, Ast.Ident, String>> rend = c.seq3(pkw_end, c.opt(pIdent), c.pSemi).pa(rde.next);
-        must(rend, rde.next, "end [name] ;");
+        must(rend, rde.next, "expecting end [name] ;");
         return new Res<>(new Ast.PackageSpec(ro.v, rde.v, ric.v), rend.next);
     }
 
@@ -1894,7 +1895,7 @@ public class Parser {
         if (r == null) {
             return null;
         }
-        Res<String> rs = c.mustp(justkw, "just a word").pa(r.next);
+        Res<String> rs = c.mustp(justkw, "expecting just a word").pa(r.next);
         return new Res<Ast.Statement>(new Ast.GotoStatement(rs.v), rs.next);
     }
 
@@ -1907,7 +1908,7 @@ public class Parser {
         if (r2 == null) {
             return new Res<Ast.Statement>(new Ast.ProcedureCall(r.v), r.next);
         } else {
-            Res<Ast.Expression> re = c.mustp(pExpr, "expecting expression").pa(r2.next);
+            Res<Ast.Expression> re = c.mustp(pExpr, "expecting an expression").pa(r2.next);
             return new Res<Ast.Statement>(new Ast.Assignment(new Ast.LValue(r.v), re.v), re.next);
         }
     }
@@ -1920,7 +1921,7 @@ public class Parser {
         List<Ast.Statement> l = new ArrayList<>();
         while (true) {
             Res<String> r2 = c.pSemi.pa(r.next);
-            must(r2, r.next, "expecting semi colon");
+            must(r2, r.next, "expecting a ';'");
             l.add(r.v);
             r = paStatement(r2.next);
             if (r == null) {
@@ -1961,7 +1962,7 @@ public class Parser {
             next = r3.next;
         }
         Res<String> r4 = pkw_then.pa(next);
-        must(r4, next, "expecting then");
+        must(r4, next, "expecting a then");
         Res<List<Ast.Statement>> rs = paStatementList(r4.next);
         return new Res<>(new Ast.ExceptionHandler(el, rs.v), rs.next);
     }
@@ -2009,9 +2010,9 @@ public class Parser {
             return null;
         }
         Res<List<Ast.Statement>> rs = paStatementList(r.next);
-        must(rs, r.next, "statement list");
+        must(rs, r.next, "expecting statement list");
         Res<Ast.ExceptionBlock> reb = paExceptionBlockOption(rs.next);
-        Res rend = c.mustp(c.seq2(pkw_end, c.opt(pIdent)), "expect end").pa(reb.next);
+        Res rend = c.mustp(c.seq2(pkw_end, c.opt(pIdent)), "expecting an 'end'").pa(reb.next);
         return new Res<>(new T2<>(rs.v, reb.v), rend.next);
     }
 
@@ -2028,16 +2029,16 @@ public class Parser {
         Res<List<Ast.Declaration>> rd = paDeclareSectionOption(s);
         Res<T2<List<Ast.Statement>, Ast.ExceptionBlock>> rse
                 = paBody(rd.next);
-        must(rse, rd.next, "expecting a begin");
+        must(rse, rd.next, "expecting a 'begin'");
 //        Res rend = c.mustp(c.seq2(pkw_end, c.opt(pIdent)), "expect end").pa(rse.next);
         Ast.Block block = new Ast.Block(rd.v, rse.v.f1, rse.v.f2);
         return new Res<Ast.Statement>(new Ast.BlockStatement(block), rse.next);
     }
 
     Res<List<Ast.Statement>> paLoopBody_comitted(Seq s) {
-        Res r1 = c.mustp(pkw_loop, "expecting loop").pa(s);
+        Res r1 = c.mustp(pkw_loop, "expecting 'loop'").pa(s);
         Res<List<Ast.Statement>> r2 = paStatementList(r1.next);
-        Res re = c.mustp(pkw_end_loop, "expecting end loop").pa(r2.next);
+        Res re = c.mustp(pkw_end_loop, "expecting 'end loop'").pa(r2.next);
         Res re2 = c.opt(pIdent).pa(re.next);
         return new Res<>(r2.v, re2.next);
     }
@@ -2062,7 +2063,7 @@ public class Parser {
             return null;
         }
         Res<Ast.Ident> rident = pIdent.pa(r.next);
-        must(rident, r.next, "expecting identifier");
+        must(rident, r.next, "expecting an identifier");
         Res rin = pkw_in.pa(rident.next);
         Res rvo = pkw2_values_of.pa(rin.next);
         if (rvo != null) {
@@ -2103,7 +2104,7 @@ public class Parser {
             if (resel != null) {
                 // skip the starting paren !
                 Res<List<Token>> rsql = paBalancedParenAndNoSemi(rin.next.tail());
-                must(rsql, rin.next, "(select .... )");
+                must(rsql, rin.next, "expecting (select .... )");
                 // eat the end paren
                 Res pc = c.pPClose.pa(rsql.next);
                 Res<List<Ast.Statement>> rl = paLoopBody_comitted(pc.next);
@@ -2249,7 +2250,7 @@ public class Parser {
             return null;
         }
         Res<Expression> re = pExpr.pa(r.next);
-        Res rt = c.mustp(pkw_then, "expecting then").pa(re.next);
+        Res rt = c.mustp(pkw_then, "expecting 'then'").pa(re.next);
         Res<List<Ast.Statement>> rsl = paStatementList(rt.next);
         List<Ast.ExprAndStatements> l = new ArrayList<>();
         l.add(new Ast.ExprAndStatements(re.v, rsl.v));
@@ -2271,7 +2272,7 @@ public class Parser {
         if (pkw_else.pa(next) != null) {
             Res relse = pkw_else.pa(next);
             Res<List<Ast.Statement>> rsl2 = paStatementList(relse.next);
-            must(rsl2, relse.next, "expecting statemnet list");
+            must(rsl2, relse.next, "expecting a statemnet list");
             elsestmts = rsl2.v;
             next = rsl2.next;
         } else {
@@ -2289,14 +2290,14 @@ public class Parser {
         Res<Ast.QualId> rq = pQualId.pa(r.next);
         Res<Boolean> rbc = c.bopt(pkw_bulk_collect).pa(rq.next);
         Res rinto = pkw_into.pa(rbc.next);
-        must(rinto, rq.next, "into");
+        must(rinto, rq.next, "expecting into");
         Res<List<Ast.LValue>> re = c.sep1(pLValue, c.pComma).pa(rinto.next);
 
         Res rlimit = pkw_limit.pa(re.next);
         if (rlimit == null) {
             return new Res<Ast.Statement>(new Ast.FetchStatement(rq.v, re.v, rbc.v, null), re.next);
         } else {
-            Res<Ast.Expression> rlimitexpr = c.mustp(pExpr, "expression").pa(rlimit.next);
+            Res<Ast.Expression> rlimitexpr = c.mustp(pExpr, "expecting an expression").pa(rlimit.next);
             return new Res<Ast.Statement>(
                     new Ast.FetchStatement(rq.v, re.v, rbc.v, rlimitexpr.v), rlimitexpr.next);
         }
@@ -2343,7 +2344,7 @@ public class Parser {
             return null;
         }
         Res<List<Ast.Expression>> re = c.sep1(pExpr, c.pComma).pa(r.next);
-        must(re, r.next, "list of expressions");
+        must(re, r.next, "expecting list of expressions");
         return new Res<Ast.Statement>(new Ast.PipeRowStatement(re.v), re.next);
     }
 
@@ -2502,7 +2503,7 @@ public class Parser {
         Res<List<Ast.Declaration>> rd = paDeclarations(s);
         Res<T2<List<Ast.Statement>, Ast.ExceptionBlock>> rse
                 = paBody(rd.next);
-        must(rse, rd.next, "expecting a begin");
+        must(rse, rd.next, "expecting a 'begin'");
         //Res rend = c.mustp(c.seq2(pkw_end, c.opt(pIdent)), "expect end").pa(rse.next);
         return new Res<>(new Ast.Block(rd.v, rse.v.f1, rse.v.f2), rse.next);
     }
@@ -2518,7 +2519,7 @@ public class Parser {
         }
         if (pkw_language.pa(r_is_or_as.next) != null) {
             Res<T2<String, String>> r3 = pLang.pa(r_is_or_as.next);
-            must(r3, r_is_or_as.next, "java proc");
+            must(r3, r_is_or_as.next, "expecting a java proc");
             return new Res<Ast.Declaration>(new Ast.ExtProcedureDefinition(r.v, r3.v.f1, r3.v.f2), r3.next);
         }
         Res<Ast.Block> rb = paProcOrFunBody(r_is_or_as.next);
@@ -2536,7 +2537,7 @@ public class Parser {
         }
         if (pkw_language.pa(r_is_or_as.next) != null) {
             Res<T2<String, String>> r3 = pLang.pa(r_is_or_as.next);
-            must(r3, r_is_or_as.next, "java proc");
+            must(r3, r_is_or_as.next, "expecting a java proc");
             return new Res<Ast.Declaration>(new Ast.ExtFunctionDefinition(r.v, r3.v.f1, r3.v.f2), r3.next);
         }
         Res<Ast.Block> rb = paProcOrFunBody(r_is_or_as.next);
@@ -2563,15 +2564,15 @@ public class Parser {
                 return null;
             }
             Res<Ast.ObjectName> rn = paObjectName(r.next);
-            Res r2 = c.mustp(pIsOrAs, "is or as").pa(rn.next);
+            Res r2 = c.mustp(pIsOrAs, "expcetcing 'is' or 'as'").pa(rn.next);
             Res<List<Ast.Declaration>> rdecls = paDeclarations(r2.next);
             if (pkw_begin.pa(rdecls.next) == null) {
-                Res rend = c.mustp(c.seq2(pkw_end, c.opt(pIdent)), "expect end").pa(rdecls.next);
-                Res rsemi = c.mustp(c.pSemi, "semi").pa(rend.next);
+                Res rend = c.mustp(c.seq2(pkw_end, c.opt(pIdent)), "expecting 'end'").pa(rdecls.next);
+                Res rsemi = c.mustp(c.pSemi, "expecting ';'").pa(rend.next);
                 return new Res<>(new Ast.PackageBody(rn.v, rdecls.v, null, null), rsemi.next);
             } else {
                 Res<T2<List<Ast.Statement>, Ast.ExceptionBlock>> rb = paBody(rdecls.next);
-                Res rsemi = c.mustp(c.pSemi, "semi").pa(rb.next);
+                Res rsemi = c.mustp(c.pSemi, "expecting ';'").pa(rb.next);
                 return new Res<>(new Ast.PackageBody(rn.v, rdecls.v, rb.v.f1, rb.v.f2), rsemi.next);
             }
         }
@@ -2589,13 +2590,17 @@ public class Parser {
         }
     };
 
+    // for parsing spec and bpdy in  one file
+    // this should not be part of the parser, the / is sqlplus
+    // specific
+    // but is is useful 
     public T2<Ast.PackageSpec, Ast.PackageBody> paCRPackageSpecAndBody(Seq s) {
         Res<Ast.PackageSpec> rs = pCRPackage.pa(s);
         Res rslash = c.token(TokenType.Div).pa(rs.next);
-        must(rslash, rs.next, "slash");
+        must(rslash, rs.next, "expecting a '/'");
         Res<Ast.PackageBody> rb = pCRPackageBody.pa(rslash.next);
         Res rslash2 = c.token(TokenType.Div).pa(rb.next);
-        must(rslash2, rb.next, "slash");
+        must(rslash2, rb.next, "expecting a '/'");
         return new T2<>(rs.v, rb.v);
     }
 }
