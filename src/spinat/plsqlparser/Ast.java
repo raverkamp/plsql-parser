@@ -406,6 +406,19 @@ public class Ast {
         }
     }
 
+    public static class TrimExpression extends Expression {
+        
+        public final TrimMode mode;
+        public final Expression trim_char;
+        public final Expression trim_source;
+        
+        public TrimExpression(TrimMode mode, Expression trim_char, Expression trim_source) {
+            this.mode = mode;
+            this.trim_char = trim_char;
+            this.trim_source = trim_source;
+        }
+    }
+
     // declaration
     public static enum ParamModeType {
 
@@ -1361,6 +1374,12 @@ public class Ast {
         SHARE, 
         SHARE_ROW_EXCLUSIVE,
         EXCLUSIVE
+    }
+    
+    public static enum TrimMode {
+        LEADING,
+        TRAILING,
+        BOTH
     }
     
     //OpenStaticRefCursorStatement of ident list * (Tokens.token list)
