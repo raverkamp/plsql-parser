@@ -34,6 +34,13 @@ public class TestParser {
         System.out.println(r.v);
         assertTrue(r.next.head().ttype == TokenType.TheEnd || r.next.head().ttype == TokenType.Div);
     }
+    
+    public void tpaDump(Pa p, String s) {
+        Seq seq = scan(s);
+        Res r = p.pa(seq);
+        assertNotNull(r);
+        AstDumper.dumpObject(System.out,r.v); 
+    }
 
     @Test
     public void test1() {
@@ -290,6 +297,14 @@ public class TestParser {
         tpa(p.pExpr, "\"TRIM\"(x from y)");
         tpa(p.pExpr, "\"TRIM\"('a' from ' ')");
     }
+    
+    @Test
+    public void testDump() {
+        Parser p = new Parser();
+        tpaDump(p.pExpr, "trim(a,b)");  
+        tpaDump(p.pExpr, "1+2");  
+    }
+    
 
     public void testPackage(String filename) {
         Parser p = new Parser();
@@ -300,7 +315,7 @@ public class TestParser {
     public void testPackageBody(String filename) {
         Parser p = new Parser();
         String s = Util.loadFile(filename);
-        tpa(p.pCRPackageBody, s);
+        tpaDump(p.pCRPackageBody, s);
     }
 
     public void testFolder(String folder) throws IOException {
