@@ -255,6 +255,9 @@ public class Parser {
         if (r == null) {
             return null;
         } else {
+            if (r.v.size()==1) {
+                return new Res<>(r.v.get(0),r.next);
+            }
             return new Res<Ast.Expression>(new Ast.OrExpr(r.v), r.next);
         }
     }
@@ -271,6 +274,9 @@ public class Parser {
         if (r == null) {
             return null;
         } else {
+             if (r.v.size()==1) {
+                return new Res<>(r.v.get(0),r.next);
+            }
             return new Res<Ast.Expression>(new Ast.AndExpr(r.v), r.next);
         }
     }
