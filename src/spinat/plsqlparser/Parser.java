@@ -17,7 +17,7 @@ public class Parser {
 
     static final Combinator c = new Combinator();
 
-    void must(Res r, Seq s, String msg) {
+    static void must(Res r, Seq s, String msg) {
         if (r == null) {
             throw new ParseException("can not parse: " + msg, s);
         }
@@ -90,6 +90,9 @@ public class Parser {
     Pa<String> pkw_nocopy = c.forkw("nocopy");
     Pa<String> pkw_from = c.forkw("from");
     Pa<String> pkw_to = c.forkw("to");
+    Pa<String> pkw_rowtype = c.forkw("rowtype");
+    Pa<String> pkw_sql = c.forkw("sql");
+    Pa<String> pkw_create = c.forkw("create");
     // do not care about the string, what operators are there else?
     Pa pkw_multiset_union_all = c.seq2(c.forkw2("multiset", "union"), c.forkw("all"));
 
@@ -98,6 +101,7 @@ public class Parser {
     Pa<String> pkw2_values_of = c.forkw2("values", "of");
     Pa<String> pkw2_indices_of = c.forkw2("indices", "of");
     Pa<String> pkw2_lock_table = c.forkw2("lock", "table");
+
 
     Pa<Integer> pNatural = new Pa<Integer>() {
 
@@ -371,8 +375,8 @@ public class Parser {
         if (r == null) {
             return null;
         }
-        Res<String> r2 = c.opt(c.forkw("not")).pa(r.next);
-        Res<String> r3 = c.forkw("in").pa(r2.next);
+        Res<String> r2 = c.opt(pkw_not).pa(r.next);
+        Res<String> r3 = pkw_in.pa(r2.next);
         if (r3 == null) {
             return r;
         }
@@ -472,11 +476,11 @@ public class Parser {
         switch (s.head().ttype) {
             case Plus:
                 Res<Expression> r1 = pExponentExpr(s.tail());
-                must(r1, s.tail(), "exptecting expression");
+                must(r1, s.tail(), "exptecting an expression");
                 return new Res<Expression>(new Ast.UnaryPlusExpression(r1.v), r1.next);
             case Minus:
                 Res<Expression> r2 = pExponentExpr(s.tail());
-                must(r2, s.tail(), "exptecting expression");
+                must(r2, s.tail(), "exptecting an expression");
                 return new Res<Expression>(new Ast.UnaryPlusExpression(r2.v), r2.next);
             default:
                 return pExponentExpr(s);
@@ -494,7 +498,7 @@ public class Parser {
             return r;
         }
         Res<Expression> re = paAtomExpr(rp.next);
-        must(re, rp.next, "Expression expected");
+        must(re, rp.next, "exptecting an expression");
         return new Res<Expression>(new Ast.BinopExpression(Ast.Binop.POWER, r.v, re.v), re.next);
     }
 
@@ -741,12 +745,12 @@ public class Parser {
     }
 
     Res<Expression> paCaseExpr(Seq s) {
-        Res<String> r0 = c.forkw("case").pa(s);
+        Res<String> r0 = pkw_case.pa(s);
         if (r0 == null) {
             return null;
         }
         Seq ss;
-        Res<String> r1 = c.forkw("when").pa(r0.next);
+        Res<String> r1 = pkw_when.pa(r0.next);
         Expression em;
         if (r1 == null) {
             Res<Expression> rm = paExpr(r0.next);
@@ -758,17 +762,17 @@ public class Parser {
         }
         List<Ast.CaseExpressionPart> l = new ArrayList<>();
         while (true) {
-            Res<String> r2 = c.forkw("when").pa(ss);
+            Res<String> r2 = pkw_when.pa(ss);
             if (r2 == null) {
                 break;
             }
             Res<Expression> re = paExpr(r2.next);
-            Res<String> rt = c.forkw("then").pa(re.next);
+            Res<String> rt = pkw_then.pa(re.next);
             Res<Expression> re2 = paExpr(rt.next);
             l.add(new Ast.CaseExpressionPart(re.v, re2.v));
             ss = re2.next;
         }
-        Res<String> r3 = c.forkw("else").pa(ss);
+        Res<String> r3 = pkw_else.pa(ss);
         Expression defaultt;
         if (r3 == null) {
             defaultt = null;
@@ -777,7 +781,7 @@ public class Parser {
             defaultt = rd.v;
             ss = rd.next;
         }
-        Res<String> r4 = c.forkw("end").pa(ss);
+        Res<String> r4 = pkw_end.pa(ss);
         must(r4, ss, "expecting and END");
         if (em == null) {
             return new Res<Expression>(new Ast.CaseBoolExpression(l, defaultt), r4.next);
@@ -787,7 +791,7 @@ public class Parser {
     }
 
     Res<Expression> paSQLAttribute(Seq s) {
-        Res<String> r1 = c.forkw("sql").pa(s);
+        Res<String> r1 = pkw_sql.pa(s);
         Res<String> r2 = c.mustp(c.pPercent, "expecting %").pa(r1.next);
         Res<Ast.Ident> r3 = c.mustp(pIdent, "expecting an identifier").pa(r2.next);
         String as = r3.v.val;
@@ -888,7 +892,7 @@ public class Parser {
             return new Res<Expression>(new Ast.VarOrCallExpression(r.v), r.next);
         } else {
             Res<Ast.Ident> ra = pIdent.pa(rp.next);
-            must(ra, rp.next, "expectinga cursor attribute");
+            must(ra, rp.next, "expecting a cursor attribute");
             // fixme maybe change to Ast
             Res<T2<String, Ast.Ident>> noch_ein_dot = c.opt(c.seq2(c.pDot, pIdent)).pa(ra.next);
             String attr_val;
@@ -958,7 +962,7 @@ public class Parser {
 
     public Res<Integer> paPrecOpt(Seq s) {
         if (c.pPOpen.pa(s) != null) {
-            Res<Integer> a = c.mustp(pNatural, "expecting natural").pa(s.tail());
+            Res<Integer> a = c.mustp(pNatural, "natural").pa(s.tail());
             Res<String> b = c.mustp(c.pPClose, "paren close").pa(a.next);
             return new Res<>(a.v, b.next);
         } else {
@@ -972,7 +976,7 @@ public class Parser {
             Res<String> a = pkw2_interval_year.pa(s);
             if (a != null) {
                 Res<Integer> yprec = paPrecOpt(a.next);
-                Res<String> b = c.mustp(c.forkw2("to", "month"), "expecting 'to month'").pa(yprec.next);
+                Res<String> b = c.mustp(c.forkw2("to", "month"), "'to month'").pa(yprec.next);
                 return new Res<Ast.DataType>(new Ast.IntervalYearToMonth(yprec.v),
                         b.next);
             }
@@ -1039,11 +1043,11 @@ public class Parser {
         if (r5 == null) {
             return new Res<Ast.DataType>(new Ast.NamedType(r4.v), r4.next);
         }
-        Res<String> r6 = c.forkw("type").pa(r5.next);
+        Res<String> r6 = pkw_type.pa(r5.next);
         if (r6 != null) {
             return new Res<Ast.DataType>(new Ast.VarType(r4.v), r6.next);
         }
-        Res<String> r7 = c.forkw("rowtype").pa(r5.next);
+        Res<String> r7 = pkw_rowtype.pa(r5.next);
         if (r7 != null) {
             return new Res<Ast.DataType>(new Ast.RowType(r4.v), r7.next);
         }
@@ -1079,7 +1083,7 @@ public class Parser {
     }
 
     public Res<Boolean> paCreateOrReplace(Seq s) {
-        Res<String> r = c.forkw("create").pa(s);
+        Res<String> r = pkw_create.pa(s);
         if (r == null) {
             return null;
         }
@@ -1747,7 +1751,7 @@ public class Parser {
         Res<String> ric = c.opt(pInvokerClause).pa(ro.next);
         Res<String> risas = c.mustp(pIsOrAs, "is or as").pa(ric.next);
         Res<List<Ast.Declaration>> rde = paDeclarations(risas.next);
-        Res<T3<String, Ast.Ident, String>> rend = c.seq3(c.forkw("end"), c.opt(pIdent), c.pSemi).pa(rde.next);
+        Res<T3<String, Ast.Ident, String>> rend = c.seq3(pkw_end, c.opt(pIdent), c.pSemi).pa(rde.next);
         must(rend, rde.next, "end [name] ;");
         return new Res<>(new Ast.PackageSpec(ro.v, rde.v, ric.v), rend.next);
     }
