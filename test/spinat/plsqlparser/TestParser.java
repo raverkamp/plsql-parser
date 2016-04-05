@@ -68,6 +68,9 @@ public class TestParser {
         tpa(p.pExpr, "-11*-8");
         tpa(p.pExpr, "cast(a as timestamp)");
         tpa(p.pExpr, "1+cast(a , timestamp)");
+        tpa(p.pExpr, "\"CAST\"(sysdate as timestamp)");
+        tpa(p.pExpr, "\"CAST\"(sysdate , timestamp)");
+        tpa(p.pExpr, "\"CAST\"(sysdate , timestamp,12)");
 
     }
 
@@ -270,10 +273,22 @@ public class TestParser {
         Parser p = new Parser();
         tpa(p.pStatement, "x:=trim(both '''' from trim(leading ' ' from va))");
         tpa(p.pStatement, "x:=trim(leading '''' from va)");
-        tpa(p.pStatement, "x:=trim(trailing from va)");
+        tpa(p.pStatement, "x:=trim(LEADING '''' from va)");
+        tpa(p.pStatement, "x:=trim(LEADING '''' FROM va)");
         tpa(p.pStatement, "x:=trim('''' from va)");
         tpa(p.pStatement, "x:=trim(va)");
         tpa(p.pStatement, "x:=trim(trim(va))");
+        tpa(p.pStatement, "x:=TRIM(x from y)");
+    }
+    
+    @Test
+    public void testTrimExpresionMean() {
+        Parser p = new Parser();
+        // you can define your own trim function !
+        // it will shadow the default definition
+        tpa(p.pExpr, "trim(a,b)");
+        tpa(p.pExpr, "\"TRIM\"(x from y)");
+        tpa(p.pExpr, "\"TRIM\"('a' from ' ')");
     }
     
     public void testPackage(String filename) {

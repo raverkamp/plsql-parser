@@ -572,8 +572,17 @@ public class Parser {
                 must(r, s.tail(), "expecting a callpart");
                 return new Res<Expression>(new Ast.NewExpression(r.v), r.next);
             }
-
-            if (s2.equalsIgnoreCase("cast")) {
+        }
+        // cast and trim are functions, they are defined in the standard 
+        if (tt == TokenType.Ident || tt == TokenType.QIdent) {
+            String h;
+            String x = s.head().str;
+            if (tt== TokenType.Ident) {
+                h = x;
+            } else {
+                h = x.substring(1,x.length()-1);
+            }
+            if (h.equalsIgnoreCase("cast")) {
                 Res<T3<String, Ast.Expression, String>> r = c.seq3(c.pPOpen, pExpr, pkw_as).pa(s.tail());
                 if (r != null) {
                     Res<T2<Ast.DataType, String>> r2 = c.seq2(pDataType, c.pPClose).pa(r.next);
@@ -581,9 +590,11 @@ public class Parser {
                     return new Res<Expression>(new Ast.CastExpression(r.v.f2, r2.v.f1), r2.next);
                 }
             }
-
-            if (s2.equalsIgnoreCase("trim")) {
-                return paTrimExpr(s);
+            if (h.equalsIgnoreCase("trim")) {
+                Res<Ast.Expression> r = paTrimExpr(s);
+                if (r!=null) {
+                    return r;
+                }
             }
         }
         return paVariableOrFunctionCall(s);
@@ -668,18 +679,21 @@ public class Parser {
         }
     }
 
+    // this will only parse the trim function with the special syntax for arguments
+    // i.e. trim(leading a from b) or trim(a from b)
+    // otherwise return null. Then it will be parsed as a normal function
     Res<Expression> paTrimExpr(Seq s) {
-        Res<String> r0 = c.forkw("trim").pa(s);
-        if (r0 == null) {
+        if (!((s.head().ttype == TokenType.Ident && s.head().str.equalsIgnoreCase("trim"))
+                ||(s.head().ttype == TokenType.QIdent && s.head().str.equalsIgnoreCase("\"TRIM\"")))) {
             return null;
         }
-        Res r1 = c.pPOpen.pa(r0.next);
+        Res r1 = c.pPOpen.pa(s.tail());
         Res r2 = c.orn(new Pa[]{c.forkw("leading"),c.forkw("trailing"),c.forkw("both")}).pa(r1.next);
         Ast.Expression trim_char, trim_source;
         Seq next;
         Ast.TrimMode mode;
         if (r2 != null) {
-            switch ((String)r2.v) {
+            switch (((String)r2.v).toLowerCase()) {
                 case "leading":
                     mode = Ast.TrimMode.LEADING;
                     break;
@@ -697,6 +711,10 @@ public class Parser {
                 Res<Expression> r4 = paAtomExpr(r2.next);
                 trim_char = r4.v;
                 r3 = c.forkw("from").pa(r4.next);
+                // if there is no "from" then this can be parsed as normal function 
+                if (r3==null) {
+                    return null;
+                }
             } else {
                 trim_char = new Ast.CString(" ");
             }
@@ -709,10 +727,8 @@ public class Parser {
             Res<Expression> r5 = paAtomExpr(r1.next);
             Res<String> r6 = c.forkw("from").pa(r5.next);
             if (r6 == null) {
-                Res<String> rc = c.mustp(c.pPClose, "expect ')'").pa(r5.next);
-                trim_char = new Ast.CString(" ");
-                trim_source = r5.v;
-                next = rc.next;
+                // parse this as a normal function
+                return null;
             } else {
                 trim_char = r5.v;
                 Res<Expression> r8 = paAtomExpr(r6.next);
