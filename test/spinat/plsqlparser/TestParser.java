@@ -265,6 +265,17 @@ public class TestParser {
         tpa(p.pStatement, "lock table a in share row exclusive mode");
     }
     
+    @Test
+    public void testTrimStatement() {
+        Parser p = new Parser();
+        tpa(p.pStatement, "x:=trim(both '''' from trim(leading ' ' from va))");
+        tpa(p.pStatement, "x:=trim(leading '''' from va)");
+        tpa(p.pStatement, "x:=trim(trailing from va)");
+        tpa(p.pStatement, "x:=trim('''' from va)");
+        tpa(p.pStatement, "x:=trim(va)");
+        tpa(p.pStatement, "x:=trim(trim(va))");
+    }
+    
     public void testPackage(String filename) {
         Parser p = new Parser();
         String s = Util.loadFile(filename);

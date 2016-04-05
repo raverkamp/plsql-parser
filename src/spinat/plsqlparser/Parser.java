@@ -582,6 +582,9 @@ public class Parser {
                 }
             }
 
+            if (s2.equalsIgnoreCase("trim")) {
+                return paTrimExpr(s);
+            }
         }
         return paVariableOrFunctionCall(s);
     }
@@ -663,6 +666,62 @@ public class Parser {
         } else {
             return null;
         }
+    }
+
+    Res<Expression> paTrimExpr(Seq s) {
+        Res<String> r0 = c.forkw("trim").pa(s);
+        if (r0 == null) {
+            return null;
+        }
+        Res r1 = c.pPOpen.pa(r0.next);
+        Res r2 = c.orn(new Pa[]{c.forkw("leading"),c.forkw("trailing"),c.forkw("both")}).pa(r1.next);
+        Ast.Expression trim_char, trim_source;
+        Seq next;
+        Ast.TrimMode mode;
+        if (r2 != null) {
+            switch ((String)r2.v) {
+                case "leading":
+                    mode = Ast.TrimMode.LEADING;
+                    break;
+                case "trailing":
+                    mode = Ast.TrimMode.TRAILING;
+                    break;
+                case "both":
+                    mode = Ast.TrimMode.BOTH;
+                    break;
+                default:
+                    throw new RuntimeException("BUG");
+            }
+            Res<String> r3  = c.forkw("from").pa(r2.next);
+            if (r3 == null) {
+                Res<Expression> r4 = paAtomExpr(r2.next);
+                trim_char = r4.v;
+                r3 = c.forkw("from").pa(r4.next);
+            } else {
+                trim_char = new Ast.CString(" ");
+            }
+            Res<Expression> rs = paAtomExpr(r3.next);
+            Res<String> rc = c.mustp(c.pPClose, "expect ')'").pa(rs.next);
+            trim_source = rs.v;
+            next = rc.next;
+        } else {
+            mode = Ast.TrimMode.BOTH;
+            Res<Expression> r5 = paAtomExpr(r1.next);
+            Res<String> r6 = c.forkw("from").pa(r5.next);
+            if (r6 == null) {
+                Res<String> rc = c.mustp(c.pPClose, "expect ')'").pa(r5.next);
+                trim_char = new Ast.CString(" ");
+                trim_source = r5.v;
+                next = rc.next;
+            } else {
+                trim_char = r5.v;
+                Res<Expression> r8 = paAtomExpr(r6.next);
+                Res<String> rc = c.mustp(c.pPClose, "expect ')'").pa(r8.next);
+                trim_source = r8.v;
+                next = rc.next;
+            }
+        }
+        return new Res<Ast.Expression>(new Ast.TrimExpression(mode, trim_char, trim_source), next);
     }
 
     Res<Expression> paCaseExpr(Seq s) {
