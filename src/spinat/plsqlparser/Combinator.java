@@ -345,7 +345,7 @@ public class Combinator {
     }
 
     public <X> Pa<String> until(final Pa<X> p, final int limit) {
-        
+
         return new Pa<String>() {
 
             @Override
@@ -358,7 +358,9 @@ public class Combinator {
                     if (r == null) {
                         count--;
                         x = x + s0.head().str.toLowerCase(Locale.ROOT) + "_";
-                        if (count == -1) return null;
+                        if (count == -1) {
+                            return null;
+                        }
                         s0 = s0.tail();
                     } else {
                         return new Res<String>(x.substring(0, x.length() > 0 ? x.length() - 1 : 0), r.next);

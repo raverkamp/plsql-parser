@@ -104,7 +104,6 @@ public class Parser {
     Pa<String> pkw2_indices_of = c.forkw2("indices", "of");
     Pa<String> pkw2_lock_table = c.forkw2("lock", "table");
 
-
     Pa<Integer> pNatural = new Pa<Integer>() {
 
         final Pa<String> p = c.token(TokenType.Int);
@@ -583,10 +582,10 @@ public class Parser {
         if (tt == TokenType.Ident || tt == TokenType.QIdent) {
             String h;
             String x = s.head().str;
-            if (tt== TokenType.Ident) {
+            if (tt == TokenType.Ident) {
                 h = x;
             } else {
-                h = x.substring(1,x.length()-1);
+                h = x.substring(1, x.length() - 1);
             }
             if (h.equalsIgnoreCase("cast")) {
                 Res<T3<String, Ast.Expression, String>> r = c.seq3(c.pPOpen, pExpr, pkw_as).pa(s.tail());
@@ -598,7 +597,7 @@ public class Parser {
             }
             if (h.equalsIgnoreCase("trim")) {
                 Res<Ast.Expression> r = paTrimExpr(s);
-                if (r!=null) {
+                if (r != null) {
                     return r;
                 }
             }
@@ -690,16 +689,16 @@ public class Parser {
     // otherwise return null. Then it will be parsed as a normal function
     Res<Expression> paTrimExpr(Seq s) {
         if (!((s.head().ttype == TokenType.Ident && s.head().str.equalsIgnoreCase("trim"))
-                ||(s.head().ttype == TokenType.QIdent && s.head().str.equalsIgnoreCase("\"TRIM\"")))) {
+                || (s.head().ttype == TokenType.QIdent && s.head().str.equalsIgnoreCase("\"TRIM\"")))) {
             return null;
         }
         Res r1 = c.pPOpen.pa(s.tail());
-        Res r2 = c.orn(new Pa[]{c.forkw("leading"),c.forkw("trailing"),c.forkw("both")}).pa(r1.next);
+        Res r2 = c.orn(new Pa[]{c.forkw("leading"), c.forkw("trailing"), c.forkw("both")}).pa(r1.next);
         Ast.Expression trim_char, trim_source;
         Seq next;
         Ast.TrimMode mode;
         if (r2 != null) {
-            switch (((String)r2.v).toLowerCase(Locale.ROOT)) {
+            switch (((String) r2.v).toLowerCase(Locale.ROOT)) {
                 case "leading":
                     mode = Ast.TrimMode.LEADING;
                     break;
@@ -712,13 +711,13 @@ public class Parser {
                 default:
                     throw new RuntimeException("BUG");
             }
-            Res<String> r3  = c.forkw("from").pa(r2.next);
+            Res<String> r3 = c.forkw("from").pa(r2.next);
             if (r3 == null) {
                 Res<Expression> r4 = paAtomExpr(r2.next);
                 trim_char = r4.v;
                 r3 = c.forkw("from").pa(r4.next);
                 // if there is no "from" then this can be parsed as normal function 
-                if (r3==null) {
+                if (r3 == null) {
                     return null;
                 }
             } else {
@@ -1871,6 +1870,7 @@ public class Parser {
                     return paSQLStatement(s);
 
                 case "lock": /*lock table*/
+
                     return paLockTableStatement(s);
             }
         }
@@ -2464,7 +2464,7 @@ public class Parser {
         Res<Boolean> r4 = c.bopt(c.forkw("nowait")).pa(r3.next);
         return new Res<Ast.Statement>(new Ast.LockTableStatement(r1.v, mode, r4.v), r4.next);
     }
-    
+
     /*
      and pProcedureDefinitionOrDeclaration s =
      bind(pProcedureHeading,

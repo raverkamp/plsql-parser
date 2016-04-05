@@ -228,7 +228,7 @@ public class TestParser {
                 + "   set y = tab(j)\n"
                 + "   where x = tab(j)");
     }
-    
+
     @Test
     public void testForallInd2() {
         Parser p = new Parser();
@@ -246,7 +246,7 @@ public class TestParser {
         tpa(p.pStatement, "for j in (select a,b,c from t1 union all (select a,b,c from t2)) loop null; end loop");
         tpa(p.pStatement, "for j in ((select a,b,c from t1 union all select a,b,c from t2)) loop null; end loop");
     }
-    
+
     @Test
     public void testTypeDeclaration() {
         Parser p = new Parser();
@@ -267,7 +267,7 @@ public class TestParser {
         tpa(p.pStatement, "lock table a,b,c in exclusive mode");
         tpa(p.pStatement, "lock table a in share row exclusive mode");
     }
-    
+
     @Test
     public void testTrimStatement() {
         Parser p = new Parser();
@@ -280,7 +280,7 @@ public class TestParser {
         tpa(p.pStatement, "x:=trim(trim(va))");
         tpa(p.pStatement, "x:=TRIM(x from y)");
     }
-    
+
     @Test
     public void testTrimExpresionMean() {
         Parser p = new Parser();
@@ -290,7 +290,7 @@ public class TestParser {
         tpa(p.pExpr, "\"TRIM\"(x from y)");
         tpa(p.pExpr, "\"TRIM\"('a' from ' ')");
     }
-    
+
     public void testPackage(String filename) {
         Parser p = new Parser();
         String s = Util.loadFile(filename);

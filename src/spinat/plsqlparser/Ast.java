@@ -24,7 +24,7 @@ public class Ast {
         CREATE, CREATE_OR_REPLACE
     }
 
-    public static abstract class Expression extends Ranged{
+    public static abstract class Expression extends Ranged {
     };
 
     public static class ActualParam {
@@ -306,11 +306,12 @@ public class Ast {
             this.expr = expr;
         }
     }
-    
+
     public static final class CastExpression extends Expression {
+
         public final Expression expr;
         public final DataType datatype;
-        
+
         public CastExpression(Expression expr, DataType datatype) {
             this.expr = expr;
             this.datatype = datatype;
@@ -334,10 +335,10 @@ public class Ast {
             this.callparts = callparts;
         }
     }
-    
+
     //%FOUND, %ISOPEN %NOTFOUND, and %ROWCOUNT. %BULK_ROWCOUNT,
-    
-     public static enum Attribute {
+    public static enum Attribute {
+
         FOUND, ISOPEN, NOTFOUND, ROWCOUNT, BULK_ROWCOUNT
     }
 
@@ -407,11 +408,11 @@ public class Ast {
     }
 
     public static class TrimExpression extends Expression {
-        
+
         public final TrimMode mode;
         public final Expression trim_char;
         public final Expression trim_source;
-        
+
         public TrimExpression(TrimMode mode, Expression trim_char, Expression trim_source) {
             this.mode = mode;
             this.trim_char = trim_char;
@@ -1271,27 +1272,27 @@ public class Ast {
             this.to = to;
         }
     }
-    
+
     public static class ValuesBounds extends BoundsClause {
-    	
-    	public final Expression collection;
-    	
-    	public ValuesBounds(Expression collection) {
-    		this.collection = collection;
-    	}
+
+        public final Expression collection;
+
+        public ValuesBounds(Expression collection) {
+            this.collection = collection;
+        }
     }
-    
+
     public static class IndicesBounds extends BoundsClause {
-    	
-    	public final Expression idx_collection;
-    	public final Expression lower;
-    	public final Expression upper;
-    	
-    	public IndicesBounds(Expression idx_collection, Expression lower, Expression upper) {
-    		this.idx_collection = idx_collection;
-    		this.lower = lower;
-    		this.upper = upper;
-    	}
+
+        public final Expression idx_collection;
+        public final Expression lower;
+        public final Expression upper;
+
+        public IndicesBounds(Expression idx_collection, Expression lower, Expression upper) {
+            this.idx_collection = idx_collection;
+            this.lower = lower;
+            this.upper = upper;
+        }
     }
 
     /*| ForAllStatement of ident * bounds_clause *  (Tokens.token list)*/
@@ -1338,12 +1339,12 @@ public class Ast {
         public final List<Ast.Ident> locktables;
         public final Ast.LockMode lockmode;
         public final Boolean isnowait;
-        
-        public LockTableStatement (
+
+        public LockTableStatement(
                 List<Ast.Ident> locktables,
                 Ast.LockMode lockmode,
                 Boolean isnowait
-                ) {
+        ) {
             this.locktables = locktables;
             this.lockmode = lockmode;
             this.isnowait = isnowait;
@@ -1368,20 +1369,22 @@ public class Ast {
     }
 
     public static enum LockMode {
-        ROW_SHARE, 
-        ROW_EXCLUSIVE, 
-        SHARE_UPDATE, 
-        SHARE, 
+
+        ROW_SHARE,
+        ROW_EXCLUSIVE,
+        SHARE_UPDATE,
+        SHARE,
         SHARE_ROW_EXCLUSIVE,
         EXCLUSIVE
     }
-    
+
     public static enum TrimMode {
+
         LEADING,
         TRAILING,
         BOTH
     }
-    
+
     //OpenStaticRefCursorStatement of ident list * (Tokens.token list)
     //         | OpenDynamicRefCursorStatement of ident list * expression * expression list
 
