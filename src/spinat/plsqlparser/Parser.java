@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import spinat.plsqlparser.Ast.Expression;
 import spinat.plsqlparser.Ast.Statement;
 
@@ -160,10 +161,10 @@ public class Parser {
         public Res<Ast.Ident> par(Seq s) {
             Token t = s.head();
             if (t.ttype == TokenType.Ident) {
-                if (badwords.contains(t.str.toLowerCase())) {
+                if (badwords.contains(t.str.toLowerCase(Locale.ROOT))) {
                     return null;
                 } else {
-                    return new Res<>(new Ast.Ident(t.str.toUpperCase()), s.tail());
+                    return new Res<>(new Ast.Ident(t.str.toUpperCase(Locale.ROOT)), s.tail());
                 }
             } else if (t.ttype == TokenType.QIdent) {
                 return new Res<>(new Ast.Ident(t.str.substring(1, t.str.length() - 1)), s.tail());
@@ -183,7 +184,7 @@ public class Parser {
         @Override
         public Res<String> par(Seq s) {
             if (s.head().ttype == TokenType.Ident) {
-                return new Res<>(s.head().str.toLowerCase(), s.tail());
+                return new Res<>(s.head().str.toLowerCase(Locale.ROOT), s.tail());
             } else {
                 return null;
             }
@@ -625,7 +626,7 @@ public class Parser {
     Res<T2<Ast.IntervalPart, T2<Integer, Integer>>> paIntervalpartMust(Seq s) {
         if (s.head().ttype == TokenType.Ident) {
             final Ast.IntervalPart ip;
-            switch (s.head().str.toLowerCase()) {
+            switch (s.head().str.toLowerCase(Locale.ROOT)) {
                 case "year":
                     ip = Ast.IntervalPart.YEAR;
                     break;
@@ -698,7 +699,7 @@ public class Parser {
         Seq next;
         Ast.TrimMode mode;
         if (r2 != null) {
-            switch (((String)r2.v).toLowerCase()) {
+            switch (((String)r2.v).toLowerCase(Locale.ROOT)) {
                 case "leading":
                     mode = Ast.TrimMode.LEADING;
                     break;
@@ -875,7 +876,7 @@ public class Parser {
         // from here comitted
         Res<Ast.Expression> r5 = c.mustp(pExpr, "expecting an expression").pa(r4.next);
         Res r6 = c.mustp(c.pPClose, "expecting a ')'").pa(r5.next);
-        return new Res<Expression>(new Ast.ExtractDatePart(r3.v.toUpperCase(), r5.v), r6.next);
+        return new Res<Expression>(new Ast.ExtractDatePart(r3.v.toUpperCase(Locale.ROOT), r5.v), r6.next);
     }
 
     Res<Expression> paVariableOrFunctionCall(Seq s) {
@@ -1390,7 +1391,7 @@ public class Parser {
                     || r.v.equalsIgnoreCase("pipelined")
                     || r.v.equalsIgnoreCase("parallel_enable")
                     || r.v.equalsIgnoreCase("result_cache"))) {
-                l.add(r.v.toLowerCase());
+                l.add(r.v.toLowerCase(Locale.ROOT));
                 next = r.next;
             } else {
                 break;
@@ -1680,7 +1681,7 @@ public class Parser {
         public Res<Ast.Declaration> par(Seq s) {
             Res<String> r = justkw.pa(s);
             if (r != null) {
-                String word = r.v.toLowerCase();
+                String word = r.v.toLowerCase(Locale.ROOT);
                 switch (word) {
                     case "begin":
                     case "end":

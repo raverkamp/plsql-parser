@@ -2,6 +2,7 @@ package spinat.plsqlparser;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class Combinator {
 
@@ -143,12 +144,13 @@ public class Combinator {
     public final Pa<String> pLabelEnd = token(TokenType.LabelEnd);
 
     public Pa<String> forkw(final String kw) {
+        final String kw_upper = kw.toUpperCase(Locale.ROOT);
         return new Pa<String>() {
 
             @Override
             public Res<String> par(Seq s) {
                 if (s.head().ttype == TokenType.Ident && s.head().str.equalsIgnoreCase(kw)) {
-                    return new Res<>(s.head().str, s.tail());
+                    return new Res<>(kw_upper, s.tail());
                 } else {
                     return null;
                 }
@@ -162,7 +164,7 @@ public class Combinator {
     }
 
     public Pa<String> forkw2(final String kw1, final String kw2) {
-        final String x = kw1 + "/" + kw2;
+        final String kw2_upper = kw1.toUpperCase(Locale.ROOT) + "/" + kw2.toUpperCase(Locale.ROOT);
         return new Pa<String>() {
 
             @Override
@@ -170,7 +172,7 @@ public class Combinator {
                 if (s.head().ttype == TokenType.Ident && s.head().str.equalsIgnoreCase(kw1)) {
                     Token t = s.tail().head();
                     if (t.ttype == TokenType.Ident && t.str.equalsIgnoreCase(kw2)) {
-                        return new Res<>(x, s.tail().tail());
+                        return new Res<>(kw2_upper, s.tail().tail());
                     } else {
                         return null;
                     }
@@ -180,7 +182,7 @@ public class Combinator {
             }
 
             public String toString() {
-                return "forkw2(" + x + ")";
+                return "forkw2(" + kw2_upper + ")";
             }
         };
     }
@@ -222,7 +224,7 @@ public class Combinator {
                     }
                     Res<X> rr2 = pa.pa(rr.next);
                     if (rr2 == null) {
-                        throw new ParseException("expecteing one more thing", rr.next);
+                        throw new ParseException("expecting one more thing", rr.next);
                     }
                     l.add(rr2.v);
                     s = rr2.next;
@@ -355,7 +357,7 @@ public class Combinator {
                     Res<X> r = p.pa(s0);
                     if (r == null) {
                         count--;
-                        x = x + s0.head().str.toLowerCase() + "_";
+                        x = x + s0.head().str.toLowerCase(Locale.ROOT) + "_";
                         if (count == -1) return null;
                         s0 = s0.tail();
                     } else {
