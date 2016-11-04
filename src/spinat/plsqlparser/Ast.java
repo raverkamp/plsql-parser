@@ -446,7 +446,7 @@ public class Ast {
      | TimestampWithTimezone (* timestamp wth timezone *)
      | LongRaw (* long raw *)
      */
-    public static abstract class DataType {
+    public static abstract class DataType extends Ranged {
     };
 
     public static class NamedType extends DataType {
@@ -486,11 +486,13 @@ public class Ast {
         public final Ident ident;
         public final int var1;
         public final Integer var2;
+        public final String charOrByte;
 
-        public ParameterizedType(Ident ident, int var1, Integer var2) {
+        public ParameterizedType(Ident ident, int var1, Integer var2,String charOrByte) {
             this.ident = ident;
             this.var1 = var1;
             this.var2 = var2;
+            this.charOrByte = charOrByte;
         }
     }
 

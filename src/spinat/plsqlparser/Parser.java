@@ -1022,10 +1022,16 @@ public class Parser {
         Res<T2<Ast.Ident, String>> r3 = c.seq2(pIdent, c.pPOpen).pa(s);
         if (r3 != null) {
             String tyname1 = r3.v.f1.val;
-            if (tyname1.equalsIgnoreCase("varchar2") || tyname1.equalsIgnoreCase("varchar")) {
+            if (tyname1.equalsIgnoreCase("varchar2") || tyname1.equalsIgnoreCase("varchar")||tyname1.equalsIgnoreCase("char")) {
                 Res<T2<Integer, String>> r99 = c.seq2(pNatural, c.opt(c.or2(c.forkw("char"), c.forkw("byte")))).pa(r3.next);
+                final String charOrByte;
+                if (r99.v.f2 == null) {
+                    charOrByte = null;
+                } else {
+                    charOrByte = r99.v.f2.toUpperCase();
+                }
                 Res r100 = c.mustp(c.pPClose, "expecting ')'").pa(r99.next);
-                return new Res<Ast.DataType>(new Ast.ParameterizedType(r3.v.f1, r99.v.f1, null), r100.next);
+                return new Res<Ast.DataType>(new Ast.ParameterizedType(r3.v.f1, r99.v.f1, null,charOrByte), r100.next);
             } else {
                 Res<T2<Integer, T2<String, Integer>>> r99 = c.seq2(pNatural, c.opt(c.seq2(c.pComma, pNatural))).pa(r3.next);
                 Res r100 = c.mustp(c.pPClose, "expecting ')'").pa(r99.next);
@@ -1035,7 +1041,7 @@ public class Parser {
                 } else {
                     z = null;
                 }
-                return new Res<Ast.DataType>(new Ast.ParameterizedType(r3.v.f1, r99.v.f1, z), r100.next);
+                return new Res<Ast.DataType>(new Ast.ParameterizedType(r3.v.f1, r99.v.f1, z,null), r100.next);
             }
         }
         // ident.ident... 

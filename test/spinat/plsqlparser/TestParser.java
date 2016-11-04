@@ -112,8 +112,14 @@ public class TestParser {
         tpa(p.pDataType, "a.b%type");
         tpa(p.pDataType, "a.b%rowtype");
         tpa(p.pDataType, "CHAR(1)");
+        tpa(p.pDataType, "CHAR(1 char)");
+        tpa(p.pDataType, "CHAR(1 byte)");
         tpa(p.pDataType, "varchar2(1000 char)");
         tpa(p.pDataType, "varchar(1000 char)");
+        tpa(p.pDataType, "varchar(1000 byte)");
+        tpa(p.pDataType, "varchar2(1000 byte)");
+        tpa(p.pDataType, "varchar(1000)");
+        tpa(p.pDataType, "varchar2(1000)");
         tpa(p.pDataType, "interval day to second");
         tpa(p.pDataType, "interval year to month");
         tpa(p.pDataType, "interval day(3) to second(4)");
