@@ -568,7 +568,7 @@ public class Ast {
 
     public static class RecordType extends TypeDefinition {
 
-        List<RecordField> fields;
+        public List<RecordField> fields;
 
         public RecordType(List<RecordField> fields) {
             this.fields = fields;
