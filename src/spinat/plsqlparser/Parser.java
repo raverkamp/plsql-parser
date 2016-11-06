@@ -97,6 +97,8 @@ public class Parser {
     Pa<String> pkw_create = c.forkw("create");
     // do not care about the string, what operators are there else?
     Pa pkw_multiset_union_all = c.seq2(c.forkw2("multiset", "union"), c.forkw("all"));
+    Pa<String> pkw_rollback = c.forkw("rollback");
+    Pa<String> pkw_savepoint = c.forkw("savepoint");
 
     Pa<String> pkw2_interval_year = c.forkw2("interval", "year");
     Pa<String> pkw2_interval_day = c.forkw2("interval", "day");
@@ -1895,11 +1897,11 @@ public class Parser {
     }
 
     public Res<Ast.Statement> paRollback(Seq s) {
-        Res<T2<String, T2<String, Ast.Ident>>> r = c.seq2(c.forkw("rollback"), c.opt(c.seq2(c.forkw("to"), pIdent))).pa(s);
+        Res<T2<String, T3<String, String,Ast.Ident>>> r = c.seq2(pkw_rollback, c.opt(c.seq3(pkw_to,c.opt(pkw_savepoint), pIdent))).pa(s);
         if (r.v.f2 == null) {
             return new Res<Ast.Statement>(new Ast.Rollback(null), r.next);
         } else {
-            return new Res<Ast.Statement>(new Ast.Rollback(r.v.f2.f2), r.next);
+            return new Res<Ast.Statement>(new Ast.Rollback(r.v.f2.f3), r.next);
         }
     }
 

@@ -213,6 +213,9 @@ public class TestParser {
         tpa(p.pStatement, "begin case bla when 'a' then null; else assa(1,2,3);  END CASE bla; end");
         tpa(p.pStatement, "begin case bla when 'a' then bla(77); else a:=x;  END CASE; end");
         tpa(p.pStatement, " l_returnvalue := to_char(l_time_utc, 'Dy, DD Mon YYYY HH24:MI:SS', 'NLS_DATE_LANGUAGE = AMERICAN') || ' GMT'");
+        tpa(p.pStatement," ROLLBACK TO SAVEPOINT xyz");
+        tpa(p.pStatement," ROLLBACK");
+        tpa(p.pStatement," ROLLBACK to xyz");
     }
 
     @Test
