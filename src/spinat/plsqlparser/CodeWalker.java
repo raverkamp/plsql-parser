@@ -1,22 +1,17 @@
 package spinat.plsqlparser;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CodeWalker {
 
-    // the code walker, excluded procedures will be skipped
+    // fixme: the package contents are just a block, the statemnets might be missing
     public void walkPackageBody(Ast.PackageBody b) {
         walkDeclarations(b.declarations);
-        if (b.statements != null) {
-            walkStatements(b.statements);
-            if (b.exceptionBlock != null) {
-                for (Ast.ExceptionHandler ec : b.exceptionBlock.handlers) {
-                    walkStatements(ec.statements);
-                }
-                if (b.exceptionBlock.othershandler != null) {
-                    walkStatements(b.exceptionBlock.othershandler);
-                }
-            }
+        // ok, for now package the body statements up into a block
+        if (b.statements != null && b.statements.size() > 0) {
+            Ast.Block block = new Ast.Block(new ArrayList<Ast.Declaration>(), b.statements, b.exceptionBlock);
+            walkBlock(block);
         }
     }
 
@@ -24,18 +19,12 @@ public class CodeWalker {
         walkDeclarations(b.declarations);
     }
 
-    void procedureStatements(Ast.ProcedureDefinition b) {
-        walkDeclarations(b.block.declarations);
-        if (b.block != null) {
-            blockStatements(b.block);
-        }
+    public void walkProcedureDefinition(Ast.ProcedureDefinition b) {
+        walkBlock(b.block);
     }
 
-    void functionStatements(Ast.FunctionDefinition b) {
-        walkDeclarations(b.block.declarations);
-        if (b.block != null) {
-            blockStatements(b.block);
-        }
+    public void walkFunctionDefinition(Ast.FunctionDefinition b) {
+        walkBlock(b.block);
     }
 
     void walkDeclarations(List<Ast.Declaration> d) {
@@ -162,29 +151,64 @@ public class CodeWalker {
                 || expr instanceof Ast.SqlAttribute) {
             // nothing to do                           
         } else {
-            throw new RuntimeException("missing check for expression type " + expr.getClass());
+            // throw new RuntimeException("missing check for expression type " + expr.getClass());
         }
+    }
+
+    public void walkExceptionDeclaration(Ast.ExceptionDeclaration ed) {
+    }
+
+    public void walkTypeDeclaration(Ast.TypeDeclaration ed) {
+    }
+
+    public void walkProcedureDeclaration(Ast.ProcedureDeclaration ed) {
+    }
+
+    public void walkFunctionDeclaration(Ast.FunctionDeclaration ed) {
+    }
+
+    public void walkExtProcedureDefinition(Ast.ExtProcedureDefinition ed) {
+    }
+
+    public void walkExtFunctionDefinition(Ast.ExtFunctionDefinition d) {
+    }
+
+    public void walkCursorDefinition(Ast.CursorDefinition ed) {
+    }
+    
+    public void walkSimplePragma(Ast.SimplePragma ed) {
     }
 
     public void walkDeclaration(Ast.Declaration d) {
 
         if (d instanceof Ast.ProcedureDefinition) {
-            Ast.ProcedureDefinition def = (Ast.ProcedureDefinition) d;
-            blockStatements(def.block);
-        }
-
-        if (d instanceof Ast.FunctionDefinition) {
-            Ast.FunctionDefinition def = (Ast.FunctionDefinition) d;
-            blockStatements(def.block);
-        }
-        if (d instanceof Ast.VariableDeclaration) {
+            walkProcedureDefinition((Ast.ProcedureDefinition) d);
+        } else if (d instanceof Ast.FunctionDefinition) {
+            walkFunctionDefinition((Ast.FunctionDefinition) d);
+        } else if (d instanceof Ast.VariableDeclaration) {
             Ast.VariableDeclaration vd = (Ast.VariableDeclaration) d;
             walkExpression(vd.default_);
+        } else if (d instanceof Ast.ExceptionDeclaration) {
+            walkExceptionDeclaration((Ast.ExceptionDeclaration) d);
+        } else if (d instanceof Ast.TypeDeclaration) {
+            walkTypeDeclaration((Ast.TypeDeclaration) d);
+        } else if (d instanceof Ast.ProcedureDeclaration) {
+            walkProcedureDeclaration((Ast.ProcedureDeclaration) d);
+        } else if (d instanceof Ast.FunctionDeclaration) {
+            walkFunctionDeclaration((Ast.FunctionDeclaration) d);
+        } else if (d instanceof Ast.CursorDefinition) {
+            walkCursorDefinition((Ast.CursorDefinition) d);
+        } else if (d instanceof Ast.ExtProcedureDefinition) {
+            walkExtProcedureDefinition((Ast.ExtProcedureDefinition) d);
+        } else if (d instanceof Ast.ExtFunctionDefinition) {
+            walkExtFunctionDefinition((Ast.ExtFunctionDefinition) d);
+        } else if (d instanceof Ast.SimplePragma) {
+            walkSimplePragma((Ast.SimplePragma) d);
+        } else {
+            throw new RuntimeException("can not walk " + d.toString());
         }
-
     }
 
-    
     public void walkStatement(Ast.Statement s) {
         if (s == null) {
             return;
@@ -192,8 +216,7 @@ public class CodeWalker {
 
         if (s instanceof Ast.BlockStatement) {
             Ast.BlockStatement bs = (Ast.BlockStatement) s;
-
-            blockStatements(bs.block);
+            walkBlock(bs.block);
         } else if (s instanceof Ast.IfStatement) {
             Ast.IfStatement ifs = (Ast.IfStatement) s;
             for (Ast.ExprAndStatements it : ifs.branches) {
@@ -327,7 +350,7 @@ public class CodeWalker {
         }
     }
 
-    private void blockStatements(Ast.Block block) {
+    public void walkBlock(Ast.Block block) {
         walkDeclarations(block.declarations);
         walkStatements(block.statements);
         if (block.exceptionBlock != null) {
