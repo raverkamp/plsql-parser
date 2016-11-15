@@ -342,7 +342,7 @@ public class CodeWalker {
         }
     }
 
-    void walkStatements(List<Ast.Statement> s) {
+    public final void walkStatements(List<Ast.Statement> s) {
         for (Ast.Statement stm : s) {
             if (stm == null) {
             }
