@@ -257,8 +257,8 @@ public class Parser {
         if (r == null) {
             return null;
         } else {
-            if (r.v.size()==1) {
-                return new Res<>(r.v.get(0),r.next);
+            if (r.v.size() == 1) {
+                return new Res<>(r.v.get(0), r.next);
             }
             return new Res<Ast.Expression>(new Ast.OrExpr(r.v), r.next);
         }
@@ -276,8 +276,8 @@ public class Parser {
         if (r == null) {
             return null;
         } else {
-             if (r.v.size()==1) {
-                return new Res<>(r.v.get(0),r.next);
+            if (r.v.size() == 1) {
+                return new Res<>(r.v.get(0), r.next);
             }
             return new Res<Ast.Expression>(new Ast.AndExpr(r.v), r.next);
         }
@@ -1024,7 +1024,7 @@ public class Parser {
         Res<T2<Ast.Ident, String>> r3 = c.seq2(pIdent, c.pPOpen).pa(s);
         if (r3 != null) {
             String tyname1 = r3.v.f1.val;
-            if (tyname1.equalsIgnoreCase("varchar2") || tyname1.equalsIgnoreCase("varchar")||tyname1.equalsIgnoreCase("char")) {
+            if (tyname1.equalsIgnoreCase("varchar2") || tyname1.equalsIgnoreCase("varchar") || tyname1.equalsIgnoreCase("char")) {
                 Res<T2<Integer, String>> r99 = c.seq2(pNatural, c.opt(c.or2(c.forkw("char"), c.forkw("byte")))).pa(r3.next);
                 final String charOrByte;
                 if (r99.v.f2 == null) {
@@ -1033,7 +1033,7 @@ public class Parser {
                     charOrByte = r99.v.f2.toUpperCase();
                 }
                 Res r100 = c.mustp(c.pPClose, "expecting ')'").pa(r99.next);
-                return new Res<Ast.DataType>(new Ast.ParameterizedType(r3.v.f1, r99.v.f1, null,charOrByte), r100.next);
+                return new Res<Ast.DataType>(new Ast.ParameterizedType(r3.v.f1, r99.v.f1, null, charOrByte), r100.next);
             } else {
                 Res<T2<Integer, T2<String, Integer>>> r99 = c.seq2(pNatural, c.opt(c.seq2(c.pComma, pNatural))).pa(r3.next);
                 Res r100 = c.mustp(c.pPClose, "expecting ')'").pa(r99.next);
@@ -1043,7 +1043,7 @@ public class Parser {
                 } else {
                     z = null;
                 }
-                return new Res<Ast.DataType>(new Ast.ParameterizedType(r3.v.f1, r99.v.f1, z,null), r100.next);
+                return new Res<Ast.DataType>(new Ast.ParameterizedType(r3.v.f1, r99.v.f1, z, null), r100.next);
             }
         }
         // ident.ident... 
@@ -1440,6 +1440,7 @@ public class Parser {
             next = r3.next;
         }
         Res<String> r4 = pkw_return.pa(next);
+        must(r4, next, "expecting 'return'");
         Res<Ast.DataType> r5 = pDataType.pa(r4.next);
         Res<List<String>> r6 = paFunctionAttributes(r5.next);
         return new Res<>(new Ast.FunctionHeading(r2.v, params, r5.v, r6.v), r6.next);
@@ -1897,7 +1898,7 @@ public class Parser {
     }
 
     public Res<Ast.Statement> paRollback(Seq s) {
-        Res<T2<String, T3<String, String,Ast.Ident>>> r = c.seq2(pkw_rollback, c.opt(c.seq3(pkw_to,c.opt(pkw_savepoint), pIdent))).pa(s);
+        Res<T2<String, T3<String, String, Ast.Ident>>> r = c.seq2(pkw_rollback, c.opt(c.seq3(pkw_to, c.opt(pkw_savepoint), pIdent))).pa(s);
         if (r.v.f2 == null) {
             return new Res<Ast.Statement>(new Ast.Rollback(null), r.next);
         } else {
