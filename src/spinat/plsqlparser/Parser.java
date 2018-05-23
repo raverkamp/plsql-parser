@@ -567,7 +567,7 @@ public class Parser {
                 return paCaseExpr(s);
             }
             if (s2.equalsIgnoreCase("sql")) {
-                return paSQLAttribute(s);
+                return pSQLAttribute.pa(s);
             }
             // date '2001-1-1' is expression of type date
             if (s2.equalsIgnoreCase("date") && s.tail().head().ttype == TokenType.String) {
@@ -820,6 +820,13 @@ public class Parser {
         }
         return new Res<Expression>(new Ast.SqlAttribute(a), r3.next);
     }
+    
+    Pa<Ast.Expression> pSQLAttribute = new Pa<Ast.Expression> () {
+        @Override
+        protected Res<Expression> par(Seq s) {
+            return paSQLAttribute(s);
+        }  
+    };
 
     Pa<Ast.LValue> pLValue = new Pa<Ast.LValue>() {
         @Override
