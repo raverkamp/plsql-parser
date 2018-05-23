@@ -811,7 +811,7 @@ public class Parser {
             a = Ast.Attribute.FOUND;
         } else if (as.equals(("ROWCOUNT"))) {
             a = Ast.Attribute.ROWCOUNT;
-        } else if (as.equals(pIdent)) {
+        } else if (as.equals("BULK_ROWCOUNT")) {
             a = Ast.Attribute.BULK_ROWCOUNT;
         } else if (as.equals("ISOPEN")) {
             a = Ast.Attribute.ISOPEN;
