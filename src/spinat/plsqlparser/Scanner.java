@@ -380,7 +380,7 @@ public class Scanner {
         }
     }
 
-    public static ArrayList<Token> scanAll(String s) {
+    private static ArrayList<Token> scanTheString(String s, boolean onlyRelevant) {
         ArrayList<Token> res = new ArrayList<>();
         int len = s.length();
         Scanner sc = new Scanner(s);
@@ -392,7 +392,9 @@ public class Scanner {
                     res.add(t);
                     istart = sc.start;
                 } else {
+                    if (! onlyRelevant) {
                     res.add(t);
+                    }
                 }
             } else {
                 res.add(new Token(TokenType.TheEnd, "", sc.start, istart, sc.line, sc.col));
@@ -400,5 +402,19 @@ public class Scanner {
             }
         }
     }
+    
+    public static ArrayList<Token> scanAll(String s) {
+        return scanTheString(s, false);
+    }
+    
+    public static ArrayList<Token> scanRelevant(String s) {
+        return scanTheString(s, true);
+    }
+    
+    public static Seq scanToSeq(String s) {
+        return new Seq(scanRelevant(s));
+    }
+    
+    
 
 }
