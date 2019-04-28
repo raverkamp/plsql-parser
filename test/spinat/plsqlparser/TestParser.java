@@ -395,7 +395,7 @@ public class TestParser {
         assertEquals(c1.onCommitRows, Ast.OnCommitRows.NIX);
         Ast.CreateTable c2 = tpa(p.pCreateTable,"create global temporary table a(x number) on commit delete rows;");
         assertTrue(c2.temporary);
-        assertEquals(c2.onCommitRows, Ast.OnCommitRows.COMMIT);
+        assertEquals(c2.onCommitRows, Ast.OnCommitRows.DELETE);
         Ast.CreateTable c3 = tpa(p.pCreateTable,"create global temporary table a(x number) on commit preserve rows;");
         assertTrue(c3.temporary);
         assertEquals(c3.onCommitRows, Ast.OnCommitRows.PRESERVE);       

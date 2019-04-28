@@ -2698,7 +2698,7 @@ public class Parser {
                     c.or2(c.forkw("preserve"), c.forkw("delete")),
                     c.forkw("rows"))).pa(r4.next);
             Ast.OnCommitRows onc = rrr.v == null ? Ast.OnCommitRows.NIX
-                    : (rrr.v.f2.equalsIgnoreCase("DELETE") ? Ast.OnCommitRows.COMMIT
+                    : (rrr.v.f2.equalsIgnoreCase("DELETE") ? Ast.OnCommitRows.DELETE
                     : Ast.OnCommitRows.PRESERVE);
             Res r5 = c.mustp(c.pSemi, "expecting semicolon").pa(rrr.next);
 

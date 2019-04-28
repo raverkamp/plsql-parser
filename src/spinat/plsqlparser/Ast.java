@@ -1475,7 +1475,7 @@ public class Ast {
     }
     
     public enum OnCommitRows {
-        COMMIT, PRESERVE, NIX
+        DELETE, PRESERVE, NIX
     }
     
     public static class ConstraintDefinition extends RelationalProperty{
