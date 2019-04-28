@@ -517,6 +517,16 @@ public class Ast {
     }
 
     public static class TimestampWithTimezone extends DataType {
+        public final boolean hasTimeZone ;
+        public final boolean localTimeZone;
+        public final Integer size;
+        
+        public TimestampWithTimezone(Integer size, boolean hasTimeZone, boolean localTimeZone) {
+            this.size = size;
+            this.hasTimeZone = hasTimeZone;
+            this.localTimeZone = localTimeZone;
+        }
+        
     }
 
     public static class LongRaw extends DataType {

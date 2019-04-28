@@ -1012,13 +1012,28 @@ public class Parser {
         return null;
     }
 
+    public Res<Ast.DataType> paTimeStamp(Seq s) {
+        Res r1 = c.forkw("timestamp").pa(s);
+        if (r1 == null) {
+            return null;
+        }
+        Res<T3<String, Integer, String>> r2 =   c.opt(c.seq3(c.pPOpen, pNatural, c.pPClose)).pa(r1.next);
+        Integer size = r2.v == null ? null : r2.v.f2;
+        Res r3 = c.forkw("with").pa(r2.next);
+        if (r3 == null) {
+            return new Res<Ast.DataType>(new Ast.TimestampWithTimezone(size, false, false), r2.next);
+        }
+        Res rloc = c.bopt(c.forkw("local")).pa(r3.next);
+        Res rtz = c.forkw2("time", "zone").pa(rloc.next);
+        must(rtz, r1.next, "expecteing with 'time zone'");
+        return new Res<Ast.DataType>(new Ast.TimestampWithTimezone(size, true, rloc.v == null), rtz.next);
+    }
+    
+    
     public Res<Ast.DataType> paDataType(Seq s) {
-        Res r1 = c.forkw2("timestamp", "with").pa(s);
-        if (r1 != null) {
-            Res rloc = c.bopt(c.forkw("local")).pa(r1.next);
-            Res rtz = c.forkw2("time", "zone").pa(rloc.next);
-            must(rtz, r1.next, "expecteing with 'time zone'");
-            return new Res<Ast.DataType>(new Ast.TimestampWithTimezone(), rtz.next);
+        Res<Ast.DataType> r1 = paTimeStamp(s);
+        if (r1!= null) {
+            return r1;
         }
         Res<String> r2 = c.forkw2("long", "raw").pa(s);
         if (r2 != null) {

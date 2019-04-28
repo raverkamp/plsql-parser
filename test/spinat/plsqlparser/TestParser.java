@@ -34,12 +34,12 @@ public class TestParser {
         System.out.println(r.v);
         assertTrue(r.next.head().ttype == TokenType.TheEnd || r.next.head().ttype == TokenType.Div);
     }
-    
+
     public void tpaDump(Pa p, String s) {
         Seq seq = scan(s);
         Res r = p.pa(seq);
         assertNotNull(r);
-        AstDumper.dumpObject(System.out,r.v); 
+        AstDumper.dumpObject(System.out, r.v);
     }
 
     @Test
@@ -213,9 +213,9 @@ public class TestParser {
         tpa(p.pStatement, "begin case bla when 'a' then null; else assa(1,2,3);  END CASE bla; end");
         tpa(p.pStatement, "begin case bla when 'a' then bla(77); else a:=x;  END CASE; end");
         tpa(p.pStatement, " l_returnvalue := to_char(l_time_utc, 'Dy, DD Mon YYYY HH24:MI:SS', 'NLS_DATE_LANGUAGE = AMERICAN') || ' GMT'");
-        tpa(p.pStatement," ROLLBACK TO SAVEPOINT xyz");
-        tpa(p.pStatement," ROLLBACK");
-        tpa(p.pStatement," ROLLBACK to xyz");
+        tpa(p.pStatement, " ROLLBACK TO SAVEPOINT xyz");
+        tpa(p.pStatement, " ROLLBACK");
+        tpa(p.pStatement, " ROLLBACK to xyz");
     }
 
     @Test
@@ -272,6 +272,16 @@ public class TestParser {
         tpa(p.pDeclaration, "subtype a is integer not null");
         tpa(p.pDeclaration, "subtype a is interval year(9) to month");
     }
+    
+    @Test
+    public void testTimestampTypeDeclaration() {
+        Parser p = new Parser();
+        tpa(p.pDataType, "number");
+        tpa(p.pDataType, "timestamp with local time zone");
+        tpa(p.pDataType, "timestamp with time zone");
+        tpa(p.pDataType, "timestamp(6) with time zone");
+        
+    }
 
     @Test
     public void testLockTable() {
@@ -306,14 +316,13 @@ public class TestParser {
         tpa(p.pExpr, "\"TRIM\"(x from y)");
         tpa(p.pExpr, "\"TRIM\"('a' from ' ')");
     }
-    
+
     @Test
     public void testDump() {
         Parser p = new Parser();
-        tpaDump(p.pExpr, "trim(a,b)");  
-        tpaDump(p.pExpr, "1+2");  
+        tpaDump(p.pExpr, "trim(a,b)");
+        tpaDump(p.pExpr, "1+2");
     }
-    
 
     public void testPackage(String filename) {
         Parser p = new Parser();
@@ -345,15 +354,27 @@ public class TestParser {
     public void testAlexandria() throws IOException {
         testFolder("/home/roland/Documents/GitHub/plsql-parser/alexandria-ora");
     }
-    
+
     @Test
     public void testTable() {
         Parser p = new Parser();
-        tpa(p.pCreateTable,"create table a (x number, y date);");
-        tpa(p.pCreateTable,"create table a (x number, y varchar2(20));");
-        tpa(p.pCreateTable,"create table a (x number, y varchar2(20 char));");
-        tpa(p.pCreateTable,"create table a (x number, y varchar2(20 byte));");
-        tpa(p.pCreateTable,"create table a (x number not null);");
-        tpa(p.pCreateTable,"create table a (x number, y number default 1);");
+        tpa(p.pCreateTable, "create table a (x number, y date);");
+        tpa(p.pCreateTable, "create table a (x number, y varchar2(20));");
+        tpa(p.pCreateTable, "create table a (x number, y varchar2(20 char));");
+        tpa(p.pCreateTable, "create table a (x number, y varchar2(20 byte));");
+        tpa(p.pCreateTable, "create table a (x number not null);");
+        tpa(p.pCreateTable, "create table a (x number, y number default 1);");
+        tpa(p.pCreateTable, "create table a(Z TIMESTAMP(6) WITH LOCAL TIME ZONE);");
+
+    }
+
+    @Test
+    public void testTable2() {
+        Parser p = new Parser();
+        tpa(p.pCreateTable, "create table a(Z TIMESTAMP(6) WITH LOCAL TIME ZONE);");
+        tpa(p.pCreateTable, "create table a(Z timestamp with local time zone);");
+        tpa(p.pCreateTable, "create table a(Z timestamp with time zone);");
+        tpa(p.pCreateTable, "create table a(Z timestamp);");
+        tpa(p.pCreateTable, "create table a(Z timestamp(4));");
     }
 }
