@@ -1455,10 +1455,12 @@ public class Ast {
     public static class ColumnDefinition extends RelationalProperty{
         public final String name;
         public final DataType datatype;
+        public final boolean nullable;
         
-        public ColumnDefinition(String name, DataType datatype) {
+        public ColumnDefinition(String name, DataType datatype, boolean nullable) {
             this.name = name;
             this.datatype = datatype;
+            this.nullable = nullable;
         }
     }
     
