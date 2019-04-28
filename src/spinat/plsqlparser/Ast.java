@@ -1474,6 +1474,10 @@ public class Ast {
         }
     }
     
+    public enum OnCommitRows {
+        COMMIT, PRESERVE, NIX
+    }
+    
     public static class ConstraintDefinition extends RelationalProperty{
         public final String name;
         
@@ -1484,11 +1488,18 @@ public class Ast {
     
     public static class CreateTable {
        public final ObjectName name;
-       public final List<RelationalProperty> relationalProperties;;
+       public final boolean temporary;
+       public final List<RelationalProperty> relationalProperties;
+       public final OnCommitRows onCommitRows;
         
-       public CreateTable(ObjectName name, List<RelationalProperty> relationalProperties) {
+       public CreateTable(ObjectName name, 
+                          boolean temporary, 
+                          OnCommitRows onCommitRows, 
+                          List<RelationalProperty> relationalProperties) {
            this.name = name;
+           this.temporary = temporary;
            this.relationalProperties = relationalProperties;
+           this.onCommitRows = onCommitRows;
        }
     }
 }

@@ -384,4 +384,20 @@ public class TestParser {
         tpa(p.pCreateTable, "create table a(Z timestamp);");
         tpa(p.pCreateTable, "create table a(Z timestamp(4));");
     }
+    
+    @Test
+    public void testTable3() {
+        Parser p = new Parser();
+        Ast.CreateTable c0 = tpa(p.pCreateTable,"create table a(x number);");
+        assertFalse(c0.temporary);
+        Ast.CreateTable c1 = tpa(p.pCreateTable,"create global temporary table a(x number);");
+        assertTrue(c1.temporary);
+        assertEquals(c1.onCommitRows, Ast.OnCommitRows.NIX);
+        Ast.CreateTable c2 = tpa(p.pCreateTable,"create global temporary table a(x number) on commit delete rows;");
+        assertTrue(c2.temporary);
+        assertEquals(c2.onCommitRows, Ast.OnCommitRows.COMMIT);
+        Ast.CreateTable c3 = tpa(p.pCreateTable,"create global temporary table a(x number) on commit preserve rows;");
+        assertTrue(c3.temporary);
+        assertEquals(c3.onCommitRows, Ast.OnCommitRows.PRESERVE);       
+    }
 }

@@ -105,7 +105,7 @@ public class Parser {
     Pa<String> pkw2_values_of = c.forkw2("values", "of");
     Pa<String> pkw2_indices_of = c.forkw2("indices", "of");
     Pa<String> pkw2_lock_table = c.forkw2("lock", "table");
-    
+
     Pa<String> pkw_table = c.forkw("table");
 
     Pa<Integer> pNatural = new Pa<Integer>() {
@@ -822,12 +822,12 @@ public class Parser {
         }
         return new Res<Expression>(new Ast.SqlAttribute(a), r3.next);
     }
-    
-    Pa<Ast.Expression> pSQLAttribute = new Pa<Ast.Expression> () {
+
+    Pa<Ast.Expression> pSQLAttribute = new Pa<Ast.Expression>() {
         @Override
         protected Res<Expression> par(Seq s) {
             return paSQLAttribute(s);
-        }  
+        }
     };
 
     Pa<Ast.LValue> pLValue = new Pa<Ast.LValue>() {
@@ -1017,7 +1017,7 @@ public class Parser {
         if (r1 == null) {
             return null;
         }
-        Res<T3<String, Integer, String>> r2 =   c.opt(c.seq3(c.pPOpen, pNatural, c.pPClose)).pa(r1.next);
+        Res<T3<String, Integer, String>> r2 = c.opt(c.seq3(c.pPOpen, pNatural, c.pPClose)).pa(r1.next);
         Integer size = r2.v == null ? null : r2.v.f2;
         Res r3 = c.forkw("with").pa(r2.next);
         if (r3 == null) {
@@ -1028,11 +1028,10 @@ public class Parser {
         must(rtz, r1.next, "expecteing with 'time zone'");
         return new Res<Ast.DataType>(new Ast.TimestampWithTimezone(size, true, rloc.v), rtz.next);
     }
-    
-    
+
     public Res<Ast.DataType> paDataType(Seq s) {
         Res<Ast.DataType> r1 = paTimeStamp(s);
-        if (r1!= null) {
+        if (r1 != null) {
             return r1;
         }
         Res<String> r2 = c.forkw2("long", "raw").pa(s);
@@ -1100,13 +1099,13 @@ public class Parser {
             return paDataType(s);
         }
     };
+
     /*    
      fun pObjectName s: object_name result  =
      tr(seq2(pIdent,opt(commit(tDot,pIdent))),
      fn (x,NONE) => (NONE,x)
      | (x,SOME (_,y)) => (SOME x,y)) s
      */
-
     public Res<Ast.ObjectName> paObjectName(Seq s) {
         Res<Ast.Ident> r = pIdent.pa(s);
         if (r == null) {
@@ -1174,19 +1173,19 @@ public class Parser {
     public Pa<T3<Ast.DataType, Boolean, Ast.Expression>> pConstantDeclaration
             = new Pa<T3<Ast.DataType, Boolean, Ast.Expression>>() {
 
-                @Override
-                public Res<T3<Ast.DataType, Boolean, Expression>> par(Seq s) {
-                    Res<String> r = c.forkw("constant").pa(s);
-                    if (r == null) {
-                        return null;
-                    }
-                    Res<T4<Ast.DataType, Boolean, String, Expression>> r2
+        @Override
+        public Res<T3<Ast.DataType, Boolean, Expression>> par(Seq s) {
+            Res<String> r = c.forkw("constant").pa(s);
+            if (r == null) {
+                return null;
+            }
+            Res<T4<Ast.DataType, Boolean, String, Expression>> r2
                     = c.seq4(pDataType, c.bopt(pNotNull), pAssignOrDefault, pExpr).pa(r.next);
-                    must(r2, r.next, "expecting constant declaration");
-                    return new Res<>(new T3<>(r2.v.f1, r2.v.f2, r2.v.f4), r2.next);
-                }
+            must(r2, r.next, "expecting constant declaration");
+            return new Res<>(new T3<>(r2.v.f1, r2.v.f2, r2.v.f4), r2.next);
+        }
 
-            };
+    };
 
     //fun pExceptionDeclaration s =
     // kw "exception" s 
@@ -1241,37 +1240,37 @@ public class Parser {
     public Pa<Ast.TypeDefinition> pRecordTypeDefinition
             = new Pa<Ast.TypeDefinition>() {
 
-                @Override
-                public Res<Ast.TypeDefinition> par(Seq s) {
-                    Res<String> r = c.forkw("record").pa(s);
-                    if (r == null) {
-                        return null;
-                    }
-                    Res<List<Ast.RecordField>> r2 = c.withParensCommit(c.sep1(pRecordField, c.pComma), r.next);
-                    must(r2, r.next, "expecting record fields");
-                    return new Res<Ast.TypeDefinition>(new Ast.RecordType(r2.v), r2.next);
-                }
-            };
+        @Override
+        public Res<Ast.TypeDefinition> par(Seq s) {
+            Res<String> r = c.forkw("record").pa(s);
+            if (r == null) {
+                return null;
+            }
+            Res<List<Ast.RecordField>> r2 = c.withParensCommit(c.sep1(pRecordField, c.pComma), r.next);
+            must(r2, r.next, "expecting record fields");
+            return new Res<Ast.TypeDefinition>(new Ast.RecordType(r2.v), r2.next);
+        }
+    };
 
     //tr(commit(seq2(kw "ref" ,kw "cursor"),opt(commit(kw "return",pDataType))),
     public Pa<Ast.TypeDefinition> pRefCursorTypeDefinition
             = new Pa<Ast.TypeDefinition>() {
 
-                @Override
-                public Res<Ast.TypeDefinition> par(Seq s) {
-                    Res<String> r = c.forkw2("ref", "cursor").pa(s);
-                    if (r == null) {
-                        return null;
-                    }
-                    Res<String> r2 = c.forkw("return").pa(r.next);
-                    if (r2 == null) {
-                        return new Res<Ast.TypeDefinition>(new Ast.RefCursorType(null), r.next);
-                    } else {
-                        Res<Ast.DataType> r3 = c.mustp(pDataType, "expecting datatype").pa(r2.next);
-                        return new Res<Ast.TypeDefinition>(new Ast.RefCursorType(r3.v), r3.next);
-                    }
-                }
-            };
+        @Override
+        public Res<Ast.TypeDefinition> par(Seq s) {
+            Res<String> r = c.forkw2("ref", "cursor").pa(s);
+            if (r == null) {
+                return null;
+            }
+            Res<String> r2 = c.forkw("return").pa(r.next);
+            if (r2 == null) {
+                return new Res<Ast.TypeDefinition>(new Ast.RefCursorType(null), r.next);
+            } else {
+                Res<Ast.DataType> r3 = c.mustp(pDataType, "expecting datatype").pa(r2.next);
+                return new Res<Ast.TypeDefinition>(new Ast.RefCursorType(r3.v), r3.next);
+            }
+        }
+    };
 
     /*"table",seq4( 
      kw "of",
@@ -1436,6 +1435,7 @@ public class Parser {
         }
         return new Res<>(l, next);
     }
+
     /*
      r(commit(kw "function",
      seq5(pProcOrFunNameInDecl,
@@ -1445,7 +1445,6 @@ public class Parser {
      pFunctionAttribute
      )),
      fn (_,(name,l,_,rdt,attrs)) => FunctionHeading (name,l,rdt,attrs)) s*/
-
     public Res<Ast.FunctionHeading> paFunctionHeading(Seq s) {
         Res<String> r = pkw_function.pa(s);
         if (r == null) {
@@ -1596,6 +1595,7 @@ public class Parser {
             }
         }
     }
+
     /*
      fun pSQLStatement s =
      case get s of 
@@ -1609,7 +1609,6 @@ public class Parser {
      else NONE
      | _ => NONE
      */
-
     public Res<Ast.Statement> paSQLStatement(Seq s) {
         if (s.head().ttype != TokenType.Ident) {
             return null;
@@ -1886,10 +1885,12 @@ public class Parser {
                     return paExitStatement(s);
                 case "continue":
                     return paContinueStatement(s);
-                case "pipe": /*row */
+                case "pipe":
+                    /*row */
 
                     return paPipeRowStatement(s);
-                case "execute": /* execute immediate */
+                case "execute":
+                    /* execute immediate */
 
                     return paExecuteImmediate(s);
 
@@ -1908,7 +1909,8 @@ public class Parser {
                 case "with": // with q as (select * from dual) select dummy fromdual into bla from q:
                     return paSQLStatement(s);
 
-                case "lock": /*lock table*/
+                case "lock":
+                    /*lock table*/
 
                     return paLockTableStatement(s);
             }
@@ -2390,28 +2392,28 @@ public class Parser {
 
     public Pa<Ast.ExecuteImmediateParameter> pExecuteImmediateParameter
             = new Pa<Ast.ExecuteImmediateParameter>() {
-                @Override
-                public Res<Ast.ExecuteImmediateParameter> par(Seq s) {
-                    Res<Ast.ParamMode> r = paParamModeOption(s);
-                    if (r == null) {
-                        return null;
-                    }
-                    if (r.v != null && r.v.nocopy) {
-                        throw new ParseException("nocopy not allowed", s);
-                    }
-                    Res<Expression> rex = pExpr.pa(r.next);
-                    if (r.v == null && rex == null) {
-                        return null;
-                    }
-                    Ast.ParamModeType pt;
-                    if (r.v == null) {
-                        pt = Ast.ParamModeType.IN;
-                    } else {
-                        pt = r.v.paramModeType;
-                    }
-                    return new Res<>(new Ast.ExecuteImmediateParameter(pt, rex.v), rex.next);
-                }
-            };
+        @Override
+        public Res<Ast.ExecuteImmediateParameter> par(Seq s) {
+            Res<Ast.ParamMode> r = paParamModeOption(s);
+            if (r == null) {
+                return null;
+            }
+            if (r.v != null && r.v.nocopy) {
+                throw new ParseException("nocopy not allowed", s);
+            }
+            Res<Expression> rex = pExpr.pa(r.next);
+            if (r.v == null && rex == null) {
+                return null;
+            }
+            Ast.ParamModeType pt;
+            if (r.v == null) {
+                pt = Ast.ParamModeType.IN;
+            } else {
+                pt = r.v.paramModeType;
+            }
+            return new Res<>(new Ast.ExecuteImmediateParameter(pt, rex.v), rex.next);
+        }
+    };
 
     public Res<List<Ast.ExecuteImmediateParameter>> paUsingOption(Seq s) {
         Res r = pkw_using.pa(s);
@@ -2525,7 +2527,7 @@ public class Parser {
                   
      */
 
-    /*
+ /*
      aDeclarations(r.next);
      }
 
@@ -2643,12 +2645,11 @@ public class Parser {
         must(rslash2, rb.next, "expecting a '/'");
         return new T2<>(rs.v, rb.v);
     }
-    
+
     // create table statement etc
-    
     public Res<Ast.RelationalProperty> paColumnDefinition(Seq s) {
         Res<Ast.Ident> r1 = pIdent.pa(s);
-        if (r1==null) {
+        if (r1 == null) {
             return null;
         }
         Res<Ast.DataType> rd = pDataType.pa(r1.next);
@@ -2663,41 +2664,45 @@ public class Parser {
             return new Res<>(new Ast.ColumnDefinition(r1.v.val, rd.v, !r2.v), r3.next);
         }
     }
-        
-        
-    
-    
+
     public Pa<Ast.RelationalProperty> paRelationalProperty = new Pa<Ast.RelationalProperty>() {
         @Override
         protected Res<Ast.RelationalProperty> par(Seq s) {
-              return paColumnDefinition(s);
+            return paColumnDefinition(s);
         }
     };
-    
-   
+
     public Pa<Ast.CreateTable> pCreateTable = new Pa<Ast.CreateTable>() {
-         @Override
+        @Override
         protected Res<Ast.CreateTable> par(Seq s) {
-        Res r1 = pkw_create.pa(s);
-        if (r1==null) {
-            return null;
-        }
-        Res r2 = pkw_table.pa(r1.next);
-        if (r2== null) {
-            return null;
-        }
-        Res<Ast.ObjectName> tabname = paObjectName(r2.next);
-        must(tabname, r2.next,"expecting a name for a table");
-        
-        Res r3 =  c.mustp(c.pPOpen,"expecting open paren").pa(tabname.next);
- 
-        Res<List<Ast.RelationalProperty>> rrp =  c.sep1(paRelationalProperty, c.pComma).pa(r3.next);
-        must(rrp,r3.next,"expection column and constraint definitions");
-        
-        Res r4 =  c.mustp(c.pPClose,"expecting close paren").pa(rrp.next);
-        Res r5 =  c.mustp(c.pSemi,"expecting semicolon").pa(r4.next);
-            
-        return new Res<Ast.CreateTable>(new Ast.CreateTable(tabname.v, rrp.v), r5.next);
+            Res r1 = pkw_create.pa(s);
+            if (r1 == null) {
+                return null;
+            }
+            Res<Boolean> rgt = c.bopt(c.forkw2("global", "temporary")).pa(r1.next);
+            Res r2 = pkw_table.pa(rgt.next);
+            if (r2 == null) {
+                return null;
+            }
+            Res<Ast.ObjectName> tabname = paObjectName(r2.next);
+            must(tabname, r2.next, "expecting a name for a table");
+
+            Res r3 = c.mustp(c.pPOpen, "expecting open paren").pa(tabname.next);
+
+            Res<List<Ast.RelationalProperty>> rrp = c.sep1(paRelationalProperty, c.pComma).pa(r3.next);
+            must(rrp, r3.next, "expection column and constraint definitions");
+
+            Res r4 = c.mustp(c.pPClose, "expecting close paren").pa(rrp.next);
+
+            Res<T3<String, String, String>> rrr = c.opt(c.seq3(c.forkw2("on", "commit"),
+                    c.or2(c.forkw("preserve"), c.forkw("delete")),
+                    c.forkw("rows"))).pa(r4.next);
+            Ast.OnCommitRows onc = rrr.v == null ? Ast.OnCommitRows.NIX
+                    : (rrr.v.f2.equalsIgnoreCase("DELETE") ? Ast.OnCommitRows.COMMIT
+                    : Ast.OnCommitRows.PRESERVE);
+            Res r5 = c.mustp(c.pSemi, "expecting semicolon").pa(rrr.next);
+
+            return new Res<Ast.CreateTable>(new Ast.CreateTable(tabname.v, rgt.v, onc, rrp.v), r5.next);
         }
     };
 }
