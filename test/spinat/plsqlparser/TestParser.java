@@ -27,12 +27,13 @@ public class TestParser {
         return new Seq(r);
     }
 
-    public void tpa(Pa p, String s) {
+    public <X> X tpa(Pa<X> p, String s) {
         Seq seq = scan(s);
-        Res r = p.pa(seq);
+        Res<X> r = p.pa(seq);
         assertNotNull(r);
         System.out.println(r.v);
         assertTrue(r.next.head().ttype == TokenType.TheEnd || r.next.head().ttype == TokenType.Div);
+        return r.v;
     }
 
     public void tpaDump(Pa p, String s) {
@@ -276,9 +277,15 @@ public class TestParser {
     @Test
     public void testTimestampTypeDeclaration() {
         Parser p = new Parser();
-        tpa(p.pDataType, "number");
-        tpa(p.pDataType, "timestamp with local time zone");
-        tpa(p.pDataType, "timestamp with time zone");
+        
+        Ast.TimestampWithTimezone a = (Ast.TimestampWithTimezone)  tpa(p.pDataType, "timestamp with local time zone");
+        assertTrue(a.hasTimeZone);
+        assertTrue(a.localTimeZone);
+
+        Ast.TimestampWithTimezone b = (Ast.TimestampWithTimezone)  tpa(p.pDataType, "timestamp with time zone");
+        assertTrue(b.hasTimeZone);
+        assertFalse(b.localTimeZone);
+
         tpa(p.pDataType, "timestamp(6) with time zone");
         
     }

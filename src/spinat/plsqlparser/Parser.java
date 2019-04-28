@@ -1023,10 +1023,10 @@ public class Parser {
         if (r3 == null) {
             return new Res<Ast.DataType>(new Ast.TimestampWithTimezone(size, false, false), r2.next);
         }
-        Res rloc = c.bopt(c.forkw("local")).pa(r3.next);
+        Res<Boolean> rloc = c.bopt(c.forkw("local")).pa(r3.next);
         Res rtz = c.forkw2("time", "zone").pa(rloc.next);
         must(rtz, r1.next, "expecteing with 'time zone'");
-        return new Res<Ast.DataType>(new Ast.TimestampWithTimezone(size, true, rloc.v == null), rtz.next);
+        return new Res<Ast.DataType>(new Ast.TimestampWithTimezone(size, true, rloc.v), rtz.next);
     }
     
     
