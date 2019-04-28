@@ -2658,9 +2658,9 @@ public class Parser {
         Res<Boolean> r2 = c.bopt(pNotNull).pa(rd.next);
         Res<T2<String, Ast.Expression>> r3 = c.seq2(pAssignOrDefault, pExpr).pa(r2.next);
         if (r3 == null) {
-            return new Res<>(new Ast.ColumnDefinition(r1.v.val, rd.v), r2.next);
+            return new Res<>(new Ast.ColumnDefinition(r1.v.val, rd.v, !r2.v), r2.next);
         } else {
-            return new Res<>(new Ast.ColumnDefinition(r1.v.val, rd.v), r3.next);
+            return new Res<>(new Ast.ColumnDefinition(r1.v.val, rd.v, !r2.v), r3.next);
         }
     }
         
