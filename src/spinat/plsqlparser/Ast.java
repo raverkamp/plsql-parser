@@ -1444,4 +1444,39 @@ public class Ast {
      | LFunctionDefinition of function_heading * string * string
      | LProcedureDefinition of procedure_heading * string * string 
      | CursorDefinition of ident *  (parameter list) * (Tokens.token list)*/
+    
+    
+    // got definitions from here:
+    // https://docs.oracle.com/database/121/SQLRF/statements_7002.htm#SQLRF01402
+    
+    public static abstract class RelationalProperty {
+    }
+    
+    public static class ColumnDefinition extends RelationalProperty{
+        public final String name;
+        public final DataType datatype;
+        
+        public ColumnDefinition(String name, DataType datatype) {
+            this.name = name;
+            this.datatype = datatype;
+        }
+    }
+    
+    public static class ConstraintDefinition extends RelationalProperty{
+        public final String name;
+        
+        public ConstraintDefinition(String name) {
+            this.name = name;
+        }
+    }
+    
+    public static class CreateTable {
+       public final ObjectName name;
+       public final List<RelationalProperty> relationalProperties;;
+        
+       public CreateTable(ObjectName name, List<RelationalProperty> relationalProperties) {
+           this.name = name;
+           this.relationalProperties = relationalProperties;
+       }
+    }
 }

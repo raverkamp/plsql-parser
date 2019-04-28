@@ -345,4 +345,15 @@ public class TestParser {
     public void testAlexandria() throws IOException {
         testFolder("/home/roland/Documents/GitHub/plsql-parser/alexandria-ora");
     }
+    
+    @Test
+    public void testTable() {
+        Parser p = new Parser();
+        tpa(p.pCreateTable,"create table a (x number, y date);");
+        tpa(p.pCreateTable,"create table a (x number, y varchar2(20));");
+        tpa(p.pCreateTable,"create table a (x number, y varchar2(20 char));");
+        tpa(p.pCreateTable,"create table a (x number, y varchar2(20 byte));");
+        tpa(p.pCreateTable,"create table a (x number not null);");
+        tpa(p.pCreateTable,"create table a (x number, y number default 1);");
+    }
 }

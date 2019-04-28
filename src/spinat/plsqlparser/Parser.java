@@ -105,6 +105,8 @@ public class Parser {
     Pa<String> pkw2_values_of = c.forkw2("values", "of");
     Pa<String> pkw2_indices_of = c.forkw2("indices", "of");
     Pa<String> pkw2_lock_table = c.forkw2("lock", "table");
+    
+    Pa<String> pkw_table = c.forkw("table");
 
     Pa<Integer> pNatural = new Pa<Integer>() {
 
@@ -2626,4 +2628,61 @@ public class Parser {
         must(rslash2, rb.next, "expecting a '/'");
         return new T2<>(rs.v, rb.v);
     }
+    
+    // create table statement etc
+    
+    public Res<Ast.RelationalProperty> paColumnDefinition(Seq s) {
+        Res<Ast.Ident> r1 = pIdent.pa(s);
+        if (r1==null) {
+            return null;
+        }
+        Res<Ast.DataType> rd = pDataType.pa(r1.next);
+        if (rd == null) {
+            return null;
+        }
+        Res<Boolean> r2 = c.bopt(pNotNull).pa(rd.next);
+        Res<T2<String, Ast.Expression>> r3 = c.seq2(pAssignOrDefault, pExpr).pa(r2.next);
+        if (r3 == null) {
+            return new Res<>(new Ast.ColumnDefinition(r1.v.val, rd.v), r2.next);
+        } else {
+            return new Res<>(new Ast.ColumnDefinition(r1.v.val, rd.v), r3.next);
+        }
+    }
+        
+        
+    
+    
+    public Pa<Ast.RelationalProperty> paRelationalProperty = new Pa<Ast.RelationalProperty>() {
+        @Override
+        protected Res<Ast.RelationalProperty> par(Seq s) {
+              return paColumnDefinition(s);
+        }
+    };
+    
+   
+    public Pa<Ast.CreateTable> pCreateTable = new Pa<Ast.CreateTable>() {
+         @Override
+        protected Res<Ast.CreateTable> par(Seq s) {
+        Res r1 = pkw_create.pa(s);
+        if (r1==null) {
+            return null;
+        }
+        Res r2 = pkw_table.pa(r1.next);
+        if (r2== null) {
+            return null;
+        }
+        Res<Ast.ObjectName> tabname = paObjectName(r2.next);
+        must(tabname, r2.next,"expecting a name for a table");
+        
+        Res r3 =  c.mustp(c.pPOpen,"expecting open paren").pa(tabname.next);
+ 
+        Res<List<Ast.RelationalProperty>> rrp =  c.sep1(paRelationalProperty, c.pComma).pa(r3.next);
+        must(rrp,r3.next,"expection column and constraint definitions");
+        
+        Res r4 =  c.mustp(c.pPClose,"expecting close paren").pa(rrp.next);
+        Res r5 =  c.mustp(c.pSemi,"expecting semicolon").pa(r4.next);
+            
+        return new Res<Ast.CreateTable>(new Ast.CreateTable(tabname.v, rrp.v), r5.next);
+        }
+    };
 }
