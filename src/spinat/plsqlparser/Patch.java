@@ -9,21 +9,19 @@ import java.util.HashMap;
 // and a method to apply a list of such edits to a string
 // you can replace a range of characters or insert at a position
 // then one can in the case the ordering ist first the Trailing and then the Leading
-
 public class Patch {
 
-    public static enum Position{
-        LEADING,TRAILING
+    public static enum Position {
+        LEADING, TRAILING
     }
-    
+
     public final int start;
     public final int end;
     public final String txt;
     public final Position position;
 
-    
     public Patch(int start, int end, String txt) {
-        if (start>=end) {
+        if (start >= end) {
             throw new RuntimeException("start must be smaller then end");
         }
         this.start = start;
@@ -31,7 +29,7 @@ public class Patch {
         this.txt = txt;
         this.position = Position.LEADING;
     }
-    
+
     public Patch(int start, Position position, String txt) {
         this.start = start;
         this.end = start;
@@ -56,8 +54,8 @@ public class Patch {
     // the LEADING patches formone position are inserted in reverse order of the
     // patches list
     public static String applyPatches(String s, ArrayList<Patch> patches) {
-        final HashMap<Patch,Integer> listpos = new HashMap<Patch, Integer>();
-        for(int i=0;i<patches.size();i++) {
+        final HashMap<Patch, Integer> listpos = new HashMap<Patch, Integer>();
+        for (int i = 0; i < patches.size(); i++) {
             listpos.put(patches.get(i), i);
         }
         ArrayList<Patch> a = new ArrayList<>();
@@ -73,20 +71,20 @@ public class Patch {
                     } else {
                         throw new RuntimeException("BUG: patch overlap");
                     }
-                } 
+                }
                 // now we know p1 is an insert patch
                 if (p2.start < p2.end) {
                     if (p1.start <= p2.start) {
                         return -1;
-                    } else if(p1.start>=p2.end) {
+                    } else if (p1.start >= p2.end) {
                         return 1;
                     } else {
-                         throw new RuntimeException("BUG: patch overlap");
+                        throw new RuntimeException("BUG: patch overlap");
                     }
                 }
                 // now we know both are insert patches
-                int a = intCompare(p1.start , p2.start);
-                if (a!=0) {
+                int a = intCompare(p1.start, p2.start);
+                if (a != 0) {
                     return a;
                 }
                 // OK same position
@@ -96,13 +94,13 @@ public class Patch {
                     } else {
                         // both are leading
                         // leading are insert in reverse order
-                        return -intCompare(listpos.get(p1),listpos.get(p2));
+                        return -intCompare(listpos.get(p1), listpos.get(p2));
                     }
                 } else if (p2.position == Position.LEADING) {
                     return -1;
                 } else {
                     // both are trailing, nprmal order
-                    return intCompare(listpos.get(p1),listpos.get(p2));
+                    return intCompare(listpos.get(p1), listpos.get(p2));
                 }
             }
         });

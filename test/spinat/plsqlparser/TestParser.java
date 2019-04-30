@@ -273,21 +273,21 @@ public class TestParser {
         tpa(p.pDeclaration, "subtype a is integer not null");
         tpa(p.pDeclaration, "subtype a is interval year(9) to month");
     }
-    
+
     @Test
     public void testTimestampTypeDeclaration() {
         Parser p = new Parser();
-        
-        Ast.TimestampWithTimezone a = (Ast.TimestampWithTimezone)  tpa(p.pDataType, "timestamp with local time zone");
+
+        Ast.TimestampWithTimezone a = (Ast.TimestampWithTimezone) tpa(p.pDataType, "timestamp with local time zone");
         assertTrue(a.hasTimeZone);
         assertTrue(a.localTimeZone);
 
-        Ast.TimestampWithTimezone b = (Ast.TimestampWithTimezone)  tpa(p.pDataType, "timestamp with time zone");
+        Ast.TimestampWithTimezone b = (Ast.TimestampWithTimezone) tpa(p.pDataType, "timestamp with time zone");
         assertTrue(b.hasTimeZone);
         assertFalse(b.localTimeZone);
 
         tpa(p.pDataType, "timestamp(6) with time zone");
-        
+
     }
 
     @Test
@@ -384,20 +384,30 @@ public class TestParser {
         tpa(p.pCreateTable, "create table a(Z timestamp);");
         tpa(p.pCreateTable, "create table a(Z timestamp(4));");
     }
-    
+
     @Test
     public void testTable3() {
         Parser p = new Parser();
-        Ast.CreateTable c0 = tpa(p.pCreateTable,"create table a(x number);");
+        Ast.CreateTable c0 = tpa(p.pCreateTable, "create table a(x number);");
         assertFalse(c0.temporary);
-        Ast.CreateTable c1 = tpa(p.pCreateTable,"create global temporary table a(x number);");
+        Ast.CreateTable c1 = tpa(p.pCreateTable, "create global temporary table a(x number);");
         assertTrue(c1.temporary);
         assertEquals(c1.onCommitRows, Ast.OnCommitRows.NIX);
-        Ast.CreateTable c2 = tpa(p.pCreateTable,"create global temporary table a(x number) on commit delete rows;");
+        Ast.CreateTable c2 = tpa(p.pCreateTable, "create global temporary table a(x number) on commit delete rows;");
         assertTrue(c2.temporary);
         assertEquals(c2.onCommitRows, Ast.OnCommitRows.DELETE);
-        Ast.CreateTable c3 = tpa(p.pCreateTable,"create global temporary table a(x number) on commit preserve rows;");
+        Ast.CreateTable c3 = tpa(p.pCreateTable, "create global temporary table a(x number) on commit preserve rows;");
         assertTrue(c3.temporary);
-        assertEquals(c3.onCommitRows, Ast.OnCommitRows.PRESERVE);       
+        assertEquals(c3.onCommitRows, Ast.OnCommitRows.PRESERVE);
+    }
+
+    @Test
+    public void testTable4() {
+        Parser p = new Parser();
+        Ast.CreateTable c0 = tpa(p.pCreateTable,
+                "create table table7 ( x integer, constraint x check (x>0));");
+        assertTrue(c0.relationalProperties.get(1) instanceof Ast.CheckConstraintDefinition);
+        Ast.CheckConstraintDefinition cd = (Ast.CheckConstraintDefinition) c0.relationalProperties.get(1);
+        assertTrue(cd.name.equals("X"));
     }
 }

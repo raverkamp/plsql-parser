@@ -46,29 +46,29 @@ public class PatchTest {
         l.add(p3);
         l.add(p4);
         l.add(p5);
-        
+
         assertEquals("ub1b2a2a1xyzo", Patch.applyPatches("ufo", l));
-        
-        Patch p6 = new Patch(2,3,"QW");
-        l.add(0,p6);
+
+        Patch p6 = new Patch(2, 3, "QW");
+        l.add(0, p6);
         assertEquals("ub1b2a2a1xyzQWx", Patch.applyPatches("ufox", l));
 
         l.remove(p6);
         l.add(p6);
         assertEquals("ub1b2a2a1xyzQWx", Patch.applyPatches("ufox", l));
-        
-        Patch p7 = new Patch(3,4,"X");
+
+        Patch p7 = new Patch(3, 4, "X");
         l.add(p7);
         assertEquals("ub1b2a2a1xyzQWX", Patch.applyPatches("ufox", l));
-       
-        Patch p8 = new Patch(4,Patch.Position.LEADING,"L");
-        l.add(0,p8);
+
+        Patch p8 = new Patch(4, Patch.Position.LEADING, "L");
+        l.add(0, p8);
         assertEquals("ub1b2a2a1xyzQWXL", Patch.applyPatches("ufox", l));
-        
-        Patch p9 = new Patch(4,Patch.Position.TRAILING,"T");
+
+        Patch p9 = new Patch(4, Patch.Position.TRAILING, "T");
         l.add(p9);
         assertEquals("ub1b2a2a1xyzQWXTL", Patch.applyPatches("ufox", l));
-        
+
     }
 
 }

@@ -49,7 +49,8 @@ public class AstDumper {
             a.append("" + o);
             a.append("\n");
             return;
-        } if (o instanceof Boolean) {
+        }
+        if (o instanceof Boolean) {
             a.append("" + o);
             a.append("\n");
             return;

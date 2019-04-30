@@ -4,8 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CodeWalker {
-    
-    protected CodeWalker(){};
+
+    protected CodeWalker() {
+    }
+
+    ;
 
     // fixme: the package contents are just a block, the statemnets might be missing
     public void walkPackageBody(Ast.PackageBody b) {
@@ -177,7 +180,7 @@ public class CodeWalker {
 
     public void walkCursorDefinition(Ast.CursorDefinition ed) {
     }
-    
+
     public void walkSimplePragma(Ast.SimplePragma ed) {
     }
 
