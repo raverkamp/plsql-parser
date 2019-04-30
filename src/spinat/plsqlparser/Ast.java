@@ -488,7 +488,7 @@ public class Ast {
         public final Integer var2;
         public final String charOrByte;
 
-        public ParameterizedType(Ident ident, int var1, Integer var2,String charOrByte) {
+        public ParameterizedType(Ident ident, int var1, Integer var2, String charOrByte) {
             this.ident = ident;
             this.var1 = var1;
             this.var2 = var2;
@@ -517,16 +517,17 @@ public class Ast {
     }
 
     public static class TimestampWithTimezone extends DataType {
-        public final boolean hasTimeZone ;
+
+        public final boolean hasTimeZone;
         public final boolean localTimeZone;
         public final Integer size;
-        
+
         public TimestampWithTimezone(Integer size, boolean hasTimeZone, boolean localTimeZone) {
             this.size = size;
             this.hasTimeZone = hasTimeZone;
             this.localTimeZone = localTimeZone;
         }
-        
+
     }
 
     public static class LongRaw extends DataType {
@@ -1442,7 +1443,7 @@ public class Ast {
      | Rollback of ident option
      (* commit is missing, but it is interpreted as a procedure *)
      */
-    /*and declaration = FunctionDeclaration of function_heading
+ /*and declaration = FunctionDeclaration of function_heading
      | TypeDefinition of ident * typedefinition
      | ProcedureDeclaration of procedure_heading
      | ExceptionDeclaration of ident
@@ -1454,52 +1455,62 @@ public class Ast {
      | LFunctionDefinition of function_heading * string * string
      | LProcedureDefinition of procedure_heading * string * string 
      | CursorDefinition of ident *  (parameter list) * (Tokens.token list)*/
-    
-    
     // got definitions from here:
     // https://docs.oracle.com/database/121/SQLRF/statements_7002.htm#SQLRF01402
-    
     public static abstract class RelationalProperty {
     }
-    
-    public static class ColumnDefinition extends RelationalProperty{
+
+    public static class ColumnDefinition extends RelationalProperty {
+
         public final String name;
         public final DataType datatype;
         public final boolean nullable;
-        
+
         public ColumnDefinition(String name, DataType datatype, boolean nullable) {
             this.name = name;
             this.datatype = datatype;
             this.nullable = nullable;
         }
     }
-    
+
     public enum OnCommitRows {
         DELETE, PRESERVE, NIX
     }
-    
-    public static class ConstraintDefinition extends RelationalProperty{
+
+    public static class ConstraintDefinition extends RelationalProperty {
+
         public final String name;
-        
+
         public ConstraintDefinition(String name) {
             this.name = name;
         }
     }
-    
+
+    public static class CheckConstraintDefinition extends ConstraintDefinition {
+
+        public final Expression expression;
+
+        public CheckConstraintDefinition(String name, Expression expression) {
+            super(name);
+            this.expression = expression;
+        }
+    }
+
     public static class CreateTable {
-       public final ObjectName name;
-       public final boolean temporary;
-       public final List<RelationalProperty> relationalProperties;
-       public final OnCommitRows onCommitRows;
-        
-       public CreateTable(ObjectName name, 
-                          boolean temporary, 
-                          OnCommitRows onCommitRows, 
-                          List<RelationalProperty> relationalProperties) {
-           this.name = name;
-           this.temporary = temporary;
-           this.relationalProperties = relationalProperties;
-           this.onCommitRows = onCommitRows;
-       }
+
+        public final ObjectName name;
+        public final boolean temporary;
+        public final List<RelationalProperty> relationalProperties;
+        public final OnCommitRows onCommitRows;
+
+        public CreateTable(ObjectName name,
+                boolean temporary,
+                OnCommitRows onCommitRows,
+                List<RelationalProperty> relationalProperties) {
+            this.name = name;
+            this.temporary = temporary;
+            this.relationalProperties = relationalProperties;
+            this.onCommitRows = onCommitRows;
+        }
     }
 }

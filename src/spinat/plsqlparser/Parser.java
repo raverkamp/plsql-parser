@@ -107,6 +107,8 @@ public class Parser {
     Pa<String> pkw2_lock_table = c.forkw2("lock", "table");
 
     Pa<String> pkw_table = c.forkw("table");
+    Pa<String> pkw_constraint = c.forkw("constraint");
+    Pa<String> pkw_check = c.forkw("check");
 
     Pa<Integer> pNatural = new Pa<Integer>() {
 
@@ -2665,9 +2667,29 @@ public class Parser {
         }
     }
 
+    public Res<Ast.RelationalProperty> paConstraintDefinition(Seq s) {
+        Res r = pkw_constraint.pa(s);
+        if (r == null) {
+            return null;
+        }
+        Res<Ast.Ident> rn = c.mustp(pIdent, "expecting constraint name").pa(r.next);
+        Res<String> rc = pkw_check.pa(rn.next);
+        if (rc == null) {
+            throw new ParseException("only check supported", rn.next);
+        }
+        Res<T3<String, Ast.Expression, String>> re = c.seq3(c.pPOpen, pExpr, c.pPClose).pa(rc.next);
+        must(re, rn.next, "expecting (expression)");
+        Ast.CheckConstraintDefinition cd = new Ast.CheckConstraintDefinition(rn.v.val, re.v.f2);
+        return new Res<Ast.RelationalProperty>(cd, re.next);
+    }
+
     public Pa<Ast.RelationalProperty> paRelationalProperty = new Pa<Ast.RelationalProperty>() {
         @Override
         protected Res<Ast.RelationalProperty> par(Seq s) {
+            Res<Ast.RelationalProperty> rp = paConstraintDefinition(s);
+            if (rp != null) {
+                return rp;
+            }
             return paColumnDefinition(s);
         }
     };
