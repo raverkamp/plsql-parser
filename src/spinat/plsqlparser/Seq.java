@@ -38,6 +38,14 @@ public final class Seq {
         }
     }
 
+    public int size() {
+        return this.end - this.start;
+    }
+
+    public List<Token> toList() {
+        return this.l.subList(start, end);
+    }
+
     @Override
     public String toString() {
         StringBuilder b = new StringBuilder();
