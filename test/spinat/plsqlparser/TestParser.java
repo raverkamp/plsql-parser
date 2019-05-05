@@ -410,7 +410,7 @@ public class TestParser {
                 "create table table7 ( x integer, constraint x check (x>0));");
         assertTrue(c0.relationalProperties.get(1) instanceof Ast.CheckConstraintDefinition);
         Ast.CheckConstraintDefinition cd = (Ast.CheckConstraintDefinition) c0.relationalProperties.get(1);
-        assertTrue(cd.name.equals("X"));
+        assertTrue(cd.name.val.equals("X"));
 
     }
 
@@ -421,7 +421,7 @@ public class TestParser {
                 "create table table1 ( x integer, y varchar2(200), constraint x primary key (x,y));");
         assertTrue(c0.relationalProperties.get(2) instanceof Ast.PrimaryKeyDefinition);
         Ast.PrimaryKeyDefinition cd = (Ast.PrimaryKeyDefinition) c0.relationalProperties.get(2);
-        assertTrue(cd.name.equals("X"));
+        assertTrue(cd.name.val.equals("X"));
         List<String> collect = cd.columns.stream().map(x -> x.val).collect(Collectors.toList());
         assertArrayEquals(new String[]{"X", "Y"}, collect.toArray());
     }
@@ -433,7 +433,7 @@ public class TestParser {
                 "create table table1 ( x integer, y varchar2(200), constraint \"x\" unique (x,  \"y\"));");
         assertTrue(c0.relationalProperties.get(2) instanceof Ast.UniqueKeyDefinition);
         Ast.UniqueKeyDefinition cd = (Ast.UniqueKeyDefinition) c0.relationalProperties.get(2);
-        assertTrue(cd.name.equals("x"));
+        assertTrue(cd.name.val.equals("x"));
         List<String> collect = cd.columns.stream().map(x -> x.val).collect(Collectors.toList());
         assertArrayEquals(new String[]{"X", "y"}, collect.toArray());
     }

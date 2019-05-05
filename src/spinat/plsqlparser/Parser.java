@@ -2661,9 +2661,9 @@ public class Parser {
         Res<Boolean> r2 = c.bopt(pNotNull).pa(rd.next);
         Res<T2<String, Ast.Expression>> r3 = c.seq2(pAssignOrDefault, pExpr).pa(r2.next);
         if (r3 == null) {
-            return new Res<>(new Ast.ColumnDefinition(r1.v.val, rd.v, !r2.v), r2.next);
+            return new Res<>(new Ast.ColumnDefinition(r1.v, rd.v, !r2.v), r2.next);
         } else {
-            return new Res<>(new Ast.ColumnDefinition(r1.v.val, rd.v, !r2.v), r3.next);
+            return new Res<>(new Ast.ColumnDefinition(r1.v, rd.v, !r2.v), r3.next);
         }
     }
 
@@ -2677,18 +2677,18 @@ public class Parser {
         if (rcc != null) {
             Res<T3<String, Ast.Expression, String>> re = c.seq3(c.pPOpen, pExpr, c.pPClose).pa(rcc.next);
             must(re, rn.next, "expecting (expression)");
-            Ast.CheckConstraintDefinition cd = new Ast.CheckConstraintDefinition(rn.v.val, re.v.f2);
+            Ast.CheckConstraintDefinition cd = new Ast.CheckConstraintDefinition(rn.v, re.v.f2);
             return new Res<Ast.RelationalProperty>(cd, re.next);
         }
         Res<String> rpc = c.forkw2("primary", "key").pa(rn.next);
         if (rpc != null) {
             Res<List<Ast.Ident>> cols = c.withParensCommit(c.sep1(pIdent, c.pComma), rpc.next);
-            return new Res<Ast.RelationalProperty>(new Ast.PrimaryKeyDefinition(rn.v.val, cols.v), cols.next);
+            return new Res<Ast.RelationalProperty>(new Ast.PrimaryKeyDefinition(rn.v, cols.v), cols.next);
         };
         Res<String> ruc = c.forkw("unique").pa(rn.next);
         if (ruc != null) {
             Res<List<Ast.Ident>> cols = c.withParensCommit(c.sep1(pIdent, c.pComma), ruc.next);
-            return new Res<Ast.RelationalProperty>(new Ast.UniqueKeyDefinition(rn.v.val, cols.v), cols.next);
+            return new Res<Ast.RelationalProperty>(new Ast.UniqueKeyDefinition(rn.v, cols.v), cols.next);
         };
 
         throw new ParseException("not a constraint", rn.next);

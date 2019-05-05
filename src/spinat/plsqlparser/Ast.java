@@ -1463,11 +1463,11 @@ public class Ast {
 
     public static class ColumnDefinition extends RelationalProperty {
 
-        public final String name;
+        public final Ast.Ident name;
         public final DataType datatype;
         public final boolean nullable;
 
-        public ColumnDefinition(String name, DataType datatype, boolean nullable) {
+        public ColumnDefinition(Ast.Ident name, DataType datatype, boolean nullable) {
             this.name = name;
             this.datatype = datatype;
             this.nullable = nullable;
@@ -1480,9 +1480,9 @@ public class Ast {
 
     public static class ConstraintDefinition extends RelationalProperty {
 
-        public final String name;
+        public final Ast.Ident name;
 
-        public ConstraintDefinition(String name) {
+        public ConstraintDefinition(Ast.Ident name) {
             this.name = name;
         }
     }
@@ -1491,7 +1491,7 @@ public class Ast {
 
         public final Expression expression;
 
-        public CheckConstraintDefinition(String name, Expression expression) {
+        public CheckConstraintDefinition(Ast.Ident name, Expression expression) {
             super(name);
             this.expression = expression;
         }
@@ -1501,7 +1501,7 @@ public class Ast {
 
         public final List<Ast.Ident> columns;
 
-        public PrimaryKeyDefinition(String name, List<Ast.Ident> columns) {
+        public PrimaryKeyDefinition(Ast.Ident name, List<Ast.Ident> columns) {
             super(name);
             this.columns = columns;
         }
@@ -1511,7 +1511,7 @@ public class Ast {
 
         public final List<Ast.Ident> columns;
 
-        public UniqueKeyDefinition(String name, List<Ast.Ident> columns) {
+        public UniqueKeyDefinition(Ast.Ident name, List<Ast.Ident> columns) {
             super(name);
             this.columns = columns;
         }
