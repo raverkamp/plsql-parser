@@ -1,6 +1,7 @@
 package spinat.plsqlparser;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Ast {
@@ -1493,6 +1494,26 @@ public class Ast {
         public CheckConstraintDefinition(String name, Expression expression) {
             super(name);
             this.expression = expression;
+        }
+    }
+
+    public static class PrimaryKeyDefinition extends ConstraintDefinition {
+
+        public final List<Ast.Ident> columns;
+
+        public PrimaryKeyDefinition(String name, List<Ast.Ident> columns) {
+            super(name);
+            this.columns = columns;
+        }
+    }
+
+    public static class UniqueKeyDefinition extends ConstraintDefinition {
+
+        public final List<Ast.Ident> columns;
+
+        public UniqueKeyDefinition(String name, List<Ast.Ident> columns) {
+            super(name);
+            this.columns = columns;
         }
     }
 

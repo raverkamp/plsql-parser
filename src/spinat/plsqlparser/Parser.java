@@ -2673,14 +2673,26 @@ public class Parser {
             return null;
         }
         Res<Ast.Ident> rn = c.mustp(pIdent, "expecting constraint name").pa(r.next);
-        Res<String> rc = pkw_check.pa(rn.next);
-        if (rc == null) {
-            throw new ParseException("only check supported", rn.next);
+        Res<String> rcc = pkw_check.pa(rn.next);
+        if (rcc != null) {
+            Res<T3<String, Ast.Expression, String>> re = c.seq3(c.pPOpen, pExpr, c.pPClose).pa(rcc.next);
+            must(re, rn.next, "expecting (expression)");
+            Ast.CheckConstraintDefinition cd = new Ast.CheckConstraintDefinition(rn.v.val, re.v.f2);
+            return new Res<Ast.RelationalProperty>(cd, re.next);
         }
-        Res<T3<String, Ast.Expression, String>> re = c.seq3(c.pPOpen, pExpr, c.pPClose).pa(rc.next);
-        must(re, rn.next, "expecting (expression)");
-        Ast.CheckConstraintDefinition cd = new Ast.CheckConstraintDefinition(rn.v.val, re.v.f2);
-        return new Res<Ast.RelationalProperty>(cd, re.next);
+        Res<String> rpc = c.forkw2("primary", "key").pa(rn.next);
+        if (rpc != null) {
+            Res<List<Ast.Ident>> cols = c.withParensCommit(c.sep1(pIdent, c.pComma), rpc.next);
+            return new Res<Ast.RelationalProperty>(new Ast.PrimaryKeyDefinition(rn.v.val, cols.v), cols.next);
+        };
+        Res<String> ruc = c.forkw("unique").pa(rn.next);
+        if (ruc != null) {
+            Res<List<Ast.Ident>> cols = c.withParensCommit(c.sep1(pIdent, c.pComma), ruc.next);
+            return new Res<Ast.RelationalProperty>(new Ast.UniqueKeyDefinition(rn.v.val, cols.v), cols.next);
+        };
+
+        throw new ParseException("not a constraint", rn.next);
+
     }
 
     public Pa<Ast.RelationalProperty> paRelationalProperty = new Pa<Ast.RelationalProperty>() {

@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -402,12 +404,37 @@ public class TestParser {
     }
 
     @Test
-    public void testTable4() {
+    public void testTableCk() {
         Parser p = new Parser();
         Ast.CreateTable c0 = tpa(p.pCreateTable,
                 "create table table7 ( x integer, constraint x check (x>0));");
         assertTrue(c0.relationalProperties.get(1) instanceof Ast.CheckConstraintDefinition);
         Ast.CheckConstraintDefinition cd = (Ast.CheckConstraintDefinition) c0.relationalProperties.get(1);
         assertTrue(cd.name.equals("X"));
+
+    }
+
+    @Test
+    public void testTablePk() {
+        Parser p = new Parser();
+        Ast.CreateTable c0 = tpa(p.pCreateTable,
+                "create table table1 ( x integer, y varchar2(200), constraint x primary key (x,y));");
+        assertTrue(c0.relationalProperties.get(2) instanceof Ast.PrimaryKeyDefinition);
+        Ast.PrimaryKeyDefinition cd = (Ast.PrimaryKeyDefinition) c0.relationalProperties.get(2);
+        assertTrue(cd.name.equals("X"));
+        List<String> collect = cd.columns.stream().map(x -> x.val).collect(Collectors.toList());
+        assertArrayEquals(new String[]{"X", "Y"}, collect.toArray());
+    }
+
+    @Test
+    public void testTableUk() {
+        Parser p = new Parser();
+        Ast.CreateTable c0 = tpa(p.pCreateTable,
+                "create table table1 ( x integer, y varchar2(200), constraint \"x\" unique (x,  \"y\"));");
+        assertTrue(c0.relationalProperties.get(2) instanceof Ast.UniqueKeyDefinition);
+        Ast.UniqueKeyDefinition cd = (Ast.UniqueKeyDefinition) c0.relationalProperties.get(2);
+        assertTrue(cd.name.equals("x"));
+        List<String> collect = cd.columns.stream().map(x -> x.val).collect(Collectors.toList());
+        assertArrayEquals(new String[]{"X", "y"}, collect.toArray());
     }
 }
