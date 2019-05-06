@@ -1509,11 +1509,25 @@ public class Ast {
 
     public static class UniqueKeyDefinition extends ConstraintDefinition {
 
-        public final List<Ast.Ident> columns;
+        public final List<Ident> columns;
 
-        public UniqueKeyDefinition(Ast.Ident name, List<Ast.Ident> columns) {
+        public UniqueKeyDefinition(Ident name, List<Ident> columns) {
             super(name);
             this.columns = columns;
+        }
+    }
+
+    public static class ForeignKeyDefinition extends ConstraintDefinition {
+
+        public final List<Ident> columns;
+        public final List<Ident> rcolumns;
+        public final ObjectName rtable;
+
+        public ForeignKeyDefinition(Ident name, List<Ident> columns, ObjectName rtable, List<Ident> rcolumns) {
+            super(name);
+            this.columns = columns;
+            this.rtable = rtable;
+            this.rcolumns = rcolumns;
         }
     }
 

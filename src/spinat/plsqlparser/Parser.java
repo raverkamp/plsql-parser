@@ -2691,6 +2691,16 @@ public class Parser {
             return new Res<Ast.RelationalProperty>(new Ast.UniqueKeyDefinition(rn.v, cols.v), cols.next);
         };
 
+        Res<String> rfc = c.forkw2("foreign", "key").pa(rn.next);
+        if (rfc != null) {
+            Res<List<Ast.Ident>> cols = c.withParensCommit(c.sep1(pIdent, c.pComma), rfc.next);
+            Res<String> rref = c.mustp(c.forkw("references"), "expecting 'references'").pa(cols.next);
+            Res<Ast.ObjectName> rRtable = paObjectName(rref.next);
+            must(rRtable, rref.next, "expecting table name");
+            Res<List<Ast.Ident>> rcols = c.withParensCommit(c.sep1(pIdent, c.pComma), rRtable.next);
+            return new Res<Ast.RelationalProperty>(new Ast.ForeignKeyDefinition(rn.v, cols.v, rRtable.v, rcols.v), rcols.next);
+        };
+
         throw new ParseException("not a constraint", rn.next);
 
     }

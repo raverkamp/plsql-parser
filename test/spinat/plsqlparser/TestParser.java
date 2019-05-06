@@ -437,4 +437,23 @@ public class TestParser {
         List<String> collect = cd.columns.stream().map(x -> x.val).collect(Collectors.toList());
         assertArrayEquals(new String[]{"X", "y"}, collect.toArray());
     }
+
+    @Test
+    public void testTableFk() {
+        Parser p = new Parser();
+        Ast.CreateTable c0 = tpa(p.pCreateTable,
+                "create table table1 ( x integer, y varchar2(200), constraint x foreign key (a,b) references bla (x,  y));");
+        assertTrue(c0.relationalProperties.get(2) instanceof Ast.ForeignKeyDefinition);
+        Ast.ForeignKeyDefinition cd = (Ast.ForeignKeyDefinition) c0.relationalProperties.get(2);
+        assertTrue(cd.name.val.equals("X"));
+        assertEquals("BLA", cd.rtable.name.val);
+        {
+            List<String> collect = cd.columns.stream().map(x -> x.val).collect(Collectors.toList());
+            assertArrayEquals(new String[]{"A", "B"}, collect.toArray());
+        }
+        {
+            List<String> collect = cd.rcolumns.stream().map(x -> x.val).collect(Collectors.toList());
+            assertArrayEquals(new String[]{"X", "Y"}, collect.toArray());
+        }
+    }
 }
