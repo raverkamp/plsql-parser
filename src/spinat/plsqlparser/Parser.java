@@ -160,6 +160,19 @@ public class Parser {
         }
     };
 
+    final Pa<Ast.CString> pCString = new Pa<Ast.CString>() {
+        @Override
+        protected Res<Ast.CString> par(Seq s) {
+            if (s.head().ttype == TokenType.String) {
+                String s1 = s.head().str;
+                String s2 = s1.substring(1, s1.length() - 1);
+                return new Res<Ast.CString>(new Ast.CString(s2.replace("''", "'")), s.tail());
+            } else {
+                return null;
+            }
+        }
+    };
+
     final Pa<Ast.Ident> pIdent = new Pa<Ast.Ident>() {
 
         @Override
@@ -733,6 +746,7 @@ public class Parser {
                     return null;
                 }
             } else {
+                // fixme, should be null
                 trim_char = new Ast.CString(" ");
             }
             Res<Expression> rs = paAtomExpr(r3.next);
@@ -2747,6 +2761,49 @@ public class Parser {
             Res r5 = c.mustp(c.pSemi, "expecting semicolon").pa(rrr.next);
 
             return new Res<Ast.CreateTable>(new Ast.CreateTable(tabname.v, rgt.v, onc, rrp.v), r5.next);
+        }
+    };
+
+    public Pa<Ast.CommentOnTable> pCommentOnTable = new Pa<Ast.CommentOnTable>() {
+        @Override
+        protected Res<Ast.CommentOnTable> par(Seq s) {
+            Res r = c.seq3(c.forkw("comment"), c.forkw("on"), c.forkw("table")).pa(s);
+            if (r == null) {
+                return null;
+            }
+            Res<Ast.ObjectName> ron = paObjectName(r.next);
+            Res r2 = c.mustp(pkw_is, "expecting \"is\"").pa(ron.next);
+            Res<Ast.CString> r3 = c.mustp(pCString, "expecting a string constant").pa(r2.next);
+            Res r4 = c.mustp(c.pSemi, "expecting semicolon").pa(r3.next);
+            return new Res<>(new Ast.CommentOnTable(ron.v, r3.v), r4.next);
+        }
+    };
+
+    public Pa<Ast.CommentOnColumn> pCommentOnColumn = new Pa<Ast.CommentOnColumn>() {
+        @Override
+        protected Res<Ast.CommentOnColumn> par(Seq s) {
+            Res r = c.seq3(c.forkw("comment"), c.forkw("on"), c.forkw("column")).pa(s);
+            if (r == null) {
+                return null;
+            }
+            final Ast.ObjectName tableName;
+            final Ast.Ident columnName;
+            final Seq weiter;
+            Res<Ast.ObjectName> ron = paObjectName(r.next);
+            if (ron.next.head().ttype == TokenType.Dot) {
+                Res<Ast.Ident> ri = pIdent.pa(ron.next.tail());
+                tableName = ron.v;
+                columnName = ri.v;
+                weiter = ri.next;
+            } else {
+                tableName = new Ast.ObjectName(null, ron.v.owner);
+                columnName = ron.v.name;
+                weiter = ron.next;
+            }
+            Res r2 = c.mustp(pkw_is, "expecting \"is\"").pa(weiter);
+            Res<Ast.CString> r3 = c.mustp(pCString, "expecting a string constant").pa(r2.next);
+            Res r4 = c.mustp(c.pSemi, "expecting semicolon").pa(r3.next);
+            return new Res<>(new Ast.CommentOnColumn(tableName, columnName, r3.v), r4.next);
         }
     };
 }

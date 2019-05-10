@@ -1548,4 +1548,28 @@ public class Ast {
             this.onCommitRows = onCommitRows;
         }
     }
+
+    public static class CommentOnTable {
+
+        public final ObjectName tableName;
+        public final Ast.CString comment;
+
+        public CommentOnTable(ObjectName tableName, Ast.CString comment) {
+            this.tableName = tableName;
+            this.comment = comment;
+        }
+    }
+
+    public static class CommentOnColumn {
+
+        public final ObjectName tableName;
+        public final Ident column;
+        public final Ast.CString comment;
+
+        public CommentOnColumn(ObjectName tableName, Ident column, Ast.CString comment) {
+            this.tableName = tableName;
+            this.column = column;
+            this.comment = comment;
+        }
+    }
 }

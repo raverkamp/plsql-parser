@@ -456,4 +456,29 @@ public class TestParser {
             assertArrayEquals(new String[]{"X", "Y"}, collect.toArray());
         }
     }
+
+    @Test
+    public void testComments() {
+        Parser p = new Parser();
+        Ast.CommentOnTable c0 = tpa(p.pCommentOnTable,
+                "comment on table bla is 'blabal';");
+        assertEquals("BLA", c0.tableName.name.val);
+        assertTrue(c0.tableName.owner == null);
+        assertEquals("blabal", c0.comment.val);
+
+        Ast.CommentOnColumn c1 = tpa(p.pCommentOnColumn,
+                "comment on column bla.x is 'blabal';");
+        assertEquals("BLA", c1.tableName.name.val);
+        assertTrue(c1.tableName.owner == null);
+        assertEquals("blabal", c1.comment.val);
+        assertEquals("X", c1.column.val);
+
+        Ast.CommentOnColumn c2 = tpa(p.pCommentOnColumn,
+                "comment on column bla.x.y is 'blabal';");
+        assertEquals("BLA", c2.tableName.owner.val);
+        assertEquals("X", c2.tableName.name.val);
+        assertEquals("blabal", c2.comment.val);
+        assertEquals("Y", c2.column.val);
+
+    }
 }
