@@ -109,6 +109,7 @@ public class Parser {
     Pa<String> pkw_table = c.forkw("table");
     Pa<String> pkw_constraint = c.forkw("constraint");
     Pa<String> pkw_check = c.forkw("check");
+    Pa<String> pkw_unique = c.forkw("unqiue");
 
     Pa<Integer> pNatural = new Pa<Integer>() {
 
@@ -2804,6 +2805,24 @@ public class Parser {
             Res<Ast.CString> r3 = c.mustp(pCString, "expecting a string constant").pa(r2.next);
             Res r4 = c.mustp(c.pSemi, "expecting semicolon").pa(r3.next);
             return new Res<>(new Ast.CommentOnColumn(tableName, columnName, r3.v), r4.next);
+        }
+    };
+
+    public Pa<Ast.CreateIndex> pCreateIndex = new Pa<Ast.CreateIndex>() {
+        @Override
+        protected Res<Ast.CreateIndex> par(Seq s) {
+            Res<T3<String, Boolean, String>> r0 = c.seq3(pkw_create, c.bopt(pkw_unique), pkw_index).pa(s);
+            if (r0 == null) {
+                return null;
+            }
+            Res<Ast.ObjectName> rn = paObjectName(r0.next);
+            must(rn, r0.next, "expecting name for index");
+            Res ron = c.mustp(c.forkw("on"), "expecting 'on'").pa(rn.next);
+            Res<Ast.ObjectName> rnt = paObjectName(ron.next);
+            Res<List<Ast.Expression>> rcols = c.withParensCommit(c.sep1(pExpr, c.pComma), rnt.next);
+
+            Res rend = c.mustp(c.pSemi, "expecting semicolon").pa(rcols.next);
+            return new Res<>(new Ast.CreateIndex(rn.v, r0.v.f2, rnt.v, rcols.v), rend.next);
         }
     };
 }

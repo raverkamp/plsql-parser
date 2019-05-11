@@ -1572,4 +1572,19 @@ public class Ast {
             this.comment = comment;
         }
     }
+
+    public static class CreateIndex {
+
+        public final ObjectName indexName;
+        public final boolean unique;
+        public final ObjectName tableName;
+        public final List<Expression> columns;
+
+        public CreateIndex(ObjectName indexName, boolean unique, ObjectName tableName, List<Expression> columns) {
+            this.indexName = indexName;
+            this.unique = unique;
+            this.tableName = tableName;
+            this.columns = columns;
+        }
+    }
 }

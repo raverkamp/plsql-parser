@@ -479,6 +479,26 @@ public class TestParser {
         assertEquals("X", c2.tableName.name.val);
         assertEquals("blabal", c2.comment.val);
         assertEquals("Y", c2.column.val);
+    }
 
+    @Test
+    public void testCreateIndex() {
+        Parser p = new Parser();
+        Ast.CreateIndex c0 = tpa(p.pCreateIndex,
+                "create index a.b on c.d (x*y, z);");
+        assertEquals(false, c0.unique);
+        assertEquals(2, c0.columns.size());
+        assertEquals("D", c0.tableName.name.val);
+        assertEquals("C", c0.tableName.owner.val);
+
+        Ast.CreateIndex c1 = tpa(p.pCreateIndex,
+                "create unqiue   index x on \"t\" (x*y, z);");
+        assertEquals(true, c1.unique);
+        assertEquals(2, c1.columns.size());
+        assertEquals("t", c1.tableName.name.val);
+        assertTrue(c1.tableName.owner == null);
+
+        assertEquals("X", c1.indexName.name.val);
+        assertTrue(c1.indexName.owner == null);
     }
 }
