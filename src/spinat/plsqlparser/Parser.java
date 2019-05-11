@@ -109,7 +109,7 @@ public class Parser {
     Pa<String> pkw_table = c.forkw("table");
     Pa<String> pkw_constraint = c.forkw("constraint");
     Pa<String> pkw_check = c.forkw("check");
-    Pa<String> pkw_unique = c.forkw("unqiue");
+    Pa<String> pkw_unique = c.forkw("unique");
 
     Pa<Integer> pNatural = new Pa<Integer>() {
 
