@@ -1531,21 +1531,37 @@ public class Ast {
         }
     }
 
+    public static class OrganizationExternal {
+
+        public final String type;
+        public final Ast.Ident defaultDirectory;
+        public final List<CString> location;
+
+        public OrganizationExternal(String type, Ast.Ident defaultDirectory, List<CString> location) {
+            this.type = type;
+            this.defaultDirectory = defaultDirectory;
+            this.location = location;
+        }
+    }
+
     public static class CreateTable {
 
         public final ObjectName name;
         public final boolean temporary;
         public final List<RelationalProperty> relationalProperties;
         public final OnCommitRows onCommitRows;
+        public final Ast.OrganizationExternal organisationExternal;
 
         public CreateTable(ObjectName name,
                 boolean temporary,
                 OnCommitRows onCommitRows,
-                List<RelationalProperty> relationalProperties) {
+                List<RelationalProperty> relationalProperties,
+                Ast.OrganizationExternal organisationExternal) {
             this.name = name;
             this.temporary = temporary;
             this.relationalProperties = relationalProperties;
             this.onCommitRows = onCommitRows;
+            this.organisationExternal = organisationExternal;
         }
     }
 

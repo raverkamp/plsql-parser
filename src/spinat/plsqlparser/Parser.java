@@ -2731,6 +2731,34 @@ public class Parser {
         }
     };
 
+    public Pa<Ast.OrganizationExternal> pOrganisationExternal = new Pa<Ast.OrganizationExternal>() {
+        @Override
+        protected Res<Ast.OrganizationExternal> par(Seq s) {
+
+            /*
+            ( TYPE ORACLE_LOADER\n" +
+"      DEFAULT DIRECTORY \"DATA_PUMP_DIR\"\n" +
+"     \n" +
+"      location('q', 'x')\n" 
+         oder    ORGANIZATION EXTERNAL
+    (default directory def_dir1 location ('events_all.csv'));
+
+             */
+            Res r = c.forkw2("ORGANIZATION", "external").pa(s);
+            if (r == null) {
+                return null;
+            }
+            Res rp = c.mustp(c.pPOpen, "expecting '('").pa(r.next);
+            // hard coded for now
+            Res<T2<String, String>> rt = c.opt(c.seq2(pkw_type, c.forkw("oracle_loader"))).pa(rp.next);
+            Res<T3<String, String, Ast.Ident>> dr = c.mustp(c.seq3(pkw_default, c.forkw("directory"), pIdent), "expection 'default directory bla'").pa(rt.next);
+            Res rl = c.mustp(c.forkw("location"), "expecting location").pa(dr.next);
+            Res<List<Ast.CString>> rlocs = c.withParensCommit(c.sep1(pCString, c.pComma), rl.next);
+            Res rpclose = c.mustp(c.pPClose, "expecting '('").pa(rlocs.next);
+            return new Res<>(new Ast.OrganizationExternal(rt.v == null ? null : rt.v.f2, dr.v.f3, rlocs.v), rpclose.next);
+        }
+    };
+
     public Pa<Ast.CreateTable> pCreateTable = new Pa<Ast.CreateTable>() {
         @Override
         protected Res<Ast.CreateTable> par(Seq s) {
@@ -2759,9 +2787,12 @@ public class Parser {
             Ast.OnCommitRows onc = rrr.v == null ? Ast.OnCommitRows.NIX
                     : (rrr.v.f2.equalsIgnoreCase("DELETE") ? Ast.OnCommitRows.DELETE
                     : Ast.OnCommitRows.PRESERVE);
-            Res r5 = c.mustp(c.pSemi, "expecting semicolon").pa(rrr.next);
 
-            return new Res<Ast.CreateTable>(new Ast.CreateTable(tabname.v, rgt.v, onc, rrp.v), r5.next);
+            Res<Ast.OrganizationExternal> roe = c.opt(pOrganisationExternal).pa(rrr.next);
+
+            Res r5 = c.mustp(c.pSemi, "expecting semicolon").pa(roe.next);
+
+            return new Res<Ast.CreateTable>(new Ast.CreateTable(tabname.v, rgt.v, onc, rrp.v, roe.v), r5.next);
         }
     };
 
@@ -2825,4 +2856,5 @@ public class Parser {
             return new Res<>(new Ast.CreateIndex(rn.v, r0.v.f2, rnt.v, rcols.v), rend.next);
         }
     };
+
 }

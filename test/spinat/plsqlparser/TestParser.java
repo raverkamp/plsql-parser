@@ -503,7 +503,7 @@ public class TestParser {
             assertEquals("X", c1.indexName.name.val);
             assertTrue(c1.indexName.owner == null);
         }
-        
+
         {
             Ast.CreateIndex c1 = tpa(p.pCreateIndex,
                     "create  index idx_table6_2 on table6(x*x);");
@@ -513,5 +513,64 @@ public class TestParser {
                     "create unique index idx_table6_2 on table6 (\"X\" * \"X\");");
         }
 
+    }
+
+    @Test
+    public void testOrgExternal() {
+        Parser p = new Parser();
+        {
+            Ast.OrganizationExternal c = tpa(p.pOrganisationExternal,
+                    "     ORGANIZATION EXTERNAL \n"
+                    + "    ( TYPE ORACLE_LOADER\n "
+                    + "      DEFAULT DIRECTORY \"DATA_PUMP_DIR\"\n"
+                    + "     \n"
+                    + "      location('q', 'x')\n"
+                    + "    )");
+        }
+        {
+            Ast.CreateTable c = tpa(p.pCreateTable,
+                    "  CREATE TABLE a21\n"
+                    + "   (	\"EVENT\" VARCHAR2(30 BYTE), \n"
+                    + "	\"START_DATE\" DATE, \n"
+                    + "	\"LENGTH\" NUMBER, \n"
+                    + "	\"REGISTRATION_DEADLINE\" DATE\n"
+                    + "   ) \n"
+                    + "   ORGANIZATION EXTERNAL \n"
+                    + "    ( TYPE ORACLE_LOADER\n"
+                    + "      DEFAULT DIRECTORY \"DATA_PUMP_DIR\"\n"
+                    + "     \n"
+                    + "      location('q', 'x')\n"
+                    + "    );");
+            assertEquals("ORACLE_LOADER", c.organisationExternal.type);
+
+        }
+        {
+            Ast.CreateTable c = tpa(p.pCreateTable,
+                    "  CREATE TABLE a21\n"
+                    + "   (	\"EVENT\" VARCHAR2(30 BYTE), \n"
+                    + "	\"START_DATE\" DATE, \n"
+                    + "	\"LENGTH\" NUMBER, \n"
+                    + "	\"REGISTRATION_DEADLINE\" DATE\n"
+                    + "   ) \n"
+                    + "   ORGANIZATION EXTERNAL \n"
+                    + "    ( \n"
+                    + "      DEFAULT DIRECTORY \"DATA_PUMP_DIR\"\n"
+                    + "     \n"
+                    + "      location('q', 'x')\n"
+                    + "    );");
+            assertTrue(c.organisationExternal.type == null);
+
+        }
+        {
+            Ast.CreateTable c = tpa(p.pCreateTable,
+                    "  CREATE TABLE a21\n"
+                    + "   (	\"EVENT\" VARCHAR2(30 BYTE), \n"
+                    + "	\"START_DATE\" DATE, \n"
+                    + "	\"LENGTH\" NUMBER, \n"
+                    + "	\"REGISTRATION_DEADLINE\" DATE\n"
+                    + "   ) ;");
+            assertTrue(c.organisationExternal == null);
+
+        }
     }
 }
