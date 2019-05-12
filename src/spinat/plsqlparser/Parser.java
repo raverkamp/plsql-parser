@@ -2883,7 +2883,7 @@ public class Parser {
                 return null;
             }
             Res rend = c.mustp(c.pSemi, "expecting semicolon").pa(rc.next);
-            return new Res<Ast.AlterTableAddConstraint>(new Ast.AlterTableAddConstraint(ro.v, (Ast.CheckConstraintDefinition) rc.v), rend.next);
+            return new Res<Ast.AlterTableAddConstraint>(new Ast.AlterTableAddConstraint(ro.v,(Ast.ConstraintDefinition) rc.v), rend.next);
         }
     };
 }
