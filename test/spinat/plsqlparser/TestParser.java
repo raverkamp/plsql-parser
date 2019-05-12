@@ -14,10 +14,10 @@ import static org.junit.Assert.*;
  * @author rav
  */
 public class TestParser {
-
+    
     public TestParser() {
     }
-
+    
     Seq scan(String s) {
         ArrayList<Token> a = Scanner.scanAll(s);
         ArrayList<Token> r = new ArrayList<>();
@@ -28,7 +28,7 @@ public class TestParser {
         }
         return new Seq(r);
     }
-
+    
     public <X> X tpa(Pa<X> p, String s) {
         Seq seq = scan(s);
         Res<X> r = p.pa(seq);
@@ -37,14 +37,14 @@ public class TestParser {
         assertTrue(r.next.head().ttype == TokenType.TheEnd || r.next.head().ttype == TokenType.Div);
         return r.v;
     }
-
+    
     public void tpaDump(Pa p, String s) {
         Seq seq = scan(s);
         Res r = p.pa(seq);
         assertNotNull(r);
         AstDumper.dumpObject(System.out, r.v);
     }
-
+    
     @Test
     public void test1() {
         String s = "1+2";
@@ -55,7 +55,7 @@ public class TestParser {
         Res<Ast.Expression> r2 = p.paExpr(se);
         System.out.println(r2.v);
     }
-
+    
     @Test
     public void test2() {
         Parser p = new Parser();
@@ -81,9 +81,9 @@ public class TestParser {
         tpa(p.pExpr, "\"CAST\"(sysdate as timestamp)");
         tpa(p.pExpr, "\"CAST\"(sysdate , timestamp)");
         tpa(p.pExpr, "\"CAST\"(sysdate , timestamp,12)");
-
+        
     }
-
+    
     @Test
     public void test3() {
         Parser p = new Parser();
@@ -92,12 +92,12 @@ public class TestParser {
         tpa(p.pExpr, "string_in LIKE c_mask");
         tpa(p.pExpr, "lower($$PLSQL_UNIT)");
         tpa(p.pIdent, "\"a\"");
-
+        
         tpa(p.pExpr, "\"a\"");
-
+        
         tpa(p.pDataType, "a");
         tpa(p.pDataType, "a.b");
-
+        
         tpa(p.pDeclaration, "TYPE vat IS VARRAY(100) OF EMPLOYEES%ROWTYPE");
         tpa(p.pDeclaration, "TYPE EMPLOYEES_rc IS REF CURSOR RETURN EMPLOYEES%ROWTYPE");
         tpa(p.pDeclaration, "C_SCOPE_PREFIX constant VARCHAR2(31) := lower($$PLSQL_UNIT) || '.'");
@@ -129,7 +129,7 @@ public class TestParser {
         tpa(p.pDataType, "interval year(9) to month");
         tpa(p.pDataType, "interval");
         tpa(p.pDataType, "\"INTERVAL\"");
-
+        
         tpa(p.pItemDeclaration, "a b");
         tpa(p.pAndExpr, "ptFinLigne > 0");
         tpa(p.pExpr, "q'[<script>]'");
@@ -141,7 +141,7 @@ public class TestParser {
         tpa(p.pExpr, "sysdate + interval '1' hour");
         tpa(p.pExpr, "bla+0.1/(z+0.7)");
     }
-
+    
     @Test
     public void testIntervals() {
         Parser p = new Parser();
@@ -165,20 +165,20 @@ public class TestParser {
         tpa(p.pExpr, "INTERVAL '4' YEAR");
         tpa(p.pExpr, "INTERVAL '50' MONTH");
     }
-
+    
     @Test
     public void testsqlAttributes() {
         Parser p = new Parser();
         tpa(p.pExpr, "1+2*(sql%rowcount +90)");
         tpa(p.pExpr, "1+2*(sql%\"ROWCOUNT\" +90)");
     }
-
+    
     @Test
     public void test4() {
         Parser p = new Parser();
         tpa(p.pDeclaration, "pragma bla");
         tpa(p.pDeclaration, "pragma restrict_references (bla,wnds,bla)");
-
+        
         tpa(p.pDeclaration, "procedure append_param(\n"
                 + "    p_params in out nocopy logger.tab_param,\n"
                 + "    p_name in varchar2,\n"
@@ -192,7 +192,7 @@ public class TestParser {
         tpa(p.pStatement, " for r in (select * from dual) loop null; end loop");
         tpa(p.pStatement, " for r in (with aa as (select * from dual) select * from aa) loop null; end loop");
         tpa(p.pStatement, " fetch a into a,b,c");
-
+        
         tpa(p.pStatement, "htp.p(q'[<script><!--\n"
                 + "    function setit(res) {\n"
                 + "      console.log(\"setit\");\n"
@@ -220,7 +220,7 @@ public class TestParser {
         tpa(p.pStatement, " ROLLBACK");
         tpa(p.pStatement, " ROLLBACK to xyz");
     }
-
+    
     @Test
     public void testForall() {
         Parser p = new Parser();
@@ -229,7 +229,7 @@ public class TestParser {
                 + "      select sss,jjj\n"
                 + "      from   kkkkk");
     }
-
+    
     @Test
     public void testForallVal() {
         Parser p = new Parser();
@@ -238,7 +238,7 @@ public class TestParser {
                 + "   set y = tab(j)\n"
                 + "   where x = tab(j)");
     }
-
+    
     @Test
     public void testForallInd() {
         Parser p = new Parser();
@@ -247,7 +247,7 @@ public class TestParser {
                 + "   set y = tab(j)\n"
                 + "   where x = tab(j)");
     }
-
+    
     @Test
     public void testForallInd2() {
         Parser p = new Parser();
@@ -256,7 +256,7 @@ public class TestParser {
                 + "   set y = tab(j)\n"
                 + "   where x = tab(j)");
     }
-
+    
     @Test
     public void testForLoopManyParens() {
         Parser p = new Parser();
@@ -265,7 +265,7 @@ public class TestParser {
         tpa(p.pStatement, "for j in (select a,b,c from t1 union all (select a,b,c from t2)) loop null; end loop");
         tpa(p.pStatement, "for j in ((select a,b,c from t1 union all select a,b,c from t2)) loop null; end loop");
     }
-
+    
     @Test
     public void testTypeDeclaration() {
         Parser p = new Parser();
@@ -275,23 +275,23 @@ public class TestParser {
         tpa(p.pDeclaration, "subtype a is integer not null");
         tpa(p.pDeclaration, "subtype a is interval year(9) to month");
     }
-
+    
     @Test
     public void testTimestampTypeDeclaration() {
         Parser p = new Parser();
-
+        
         Ast.TimestampWithTimezone a = (Ast.TimestampWithTimezone) tpa(p.pDataType, "timestamp with local time zone");
         assertTrue(a.hasTimeZone);
         assertTrue(a.localTimeZone);
-
+        
         Ast.TimestampWithTimezone b = (Ast.TimestampWithTimezone) tpa(p.pDataType, "timestamp with time zone");
         assertTrue(b.hasTimeZone);
         assertFalse(b.localTimeZone);
-
+        
         tpa(p.pDataType, "timestamp(6) with time zone");
-
+        
     }
-
+    
     @Test
     public void testLockTable() {
         Parser p = new Parser();
@@ -302,7 +302,7 @@ public class TestParser {
         tpa(p.pStatement, "lock table a,b,c in exclusive mode");
         tpa(p.pStatement, "lock table a in share row exclusive mode");
     }
-
+    
     @Test
     public void testTrimStatement() {
         Parser p = new Parser();
@@ -315,7 +315,7 @@ public class TestParser {
         tpa(p.pStatement, "x:=trim(trim(va))");
         tpa(p.pStatement, "x:=TRIM(x from y)");
     }
-
+    
     @Test
     public void testTrimExpresionMean() {
         Parser p = new Parser();
@@ -325,26 +325,26 @@ public class TestParser {
         tpa(p.pExpr, "\"TRIM\"(x from y)");
         tpa(p.pExpr, "\"TRIM\"('a' from ' ')");
     }
-
+    
     @Test
     public void testDump() {
         Parser p = new Parser();
         tpaDump(p.pExpr, "trim(a,b)");
         tpaDump(p.pExpr, "1+2");
     }
-
+    
     public void testPackage(String filename) {
         Parser p = new Parser();
         String s = Util.loadFile(filename);
         tpa(p.pCRPackage, s);
     }
-
+    
     public void testPackageBody(String filename) {
         Parser p = new Parser();
         String s = Util.loadFile(filename);
         tpaDump(p.pCRPackageBody, s);
     }
-
+    
     public void testFolder(String folder) throws IOException {
         Path p = Paths.get(folder);
         for (Path a : java.nio.file.Files.newDirectoryStream(p)) {
@@ -358,12 +358,12 @@ public class TestParser {
             }
         }
     }
-
+    
     @Test
     public void testAlexandria() throws IOException {
         testFolder("/home/roland/Documents/GitHub/plsql-parser/alexandria-ora");
     }
-
+    
     @Test
     public void testTable() {
         Parser p = new Parser();
@@ -374,9 +374,9 @@ public class TestParser {
         tpa(p.pCreateTable, "create table a (x number not null);");
         tpa(p.pCreateTable, "create table a (x number, y number default 1);");
         tpa(p.pCreateTable, "create table a(Z TIMESTAMP(6) WITH LOCAL TIME ZONE);");
-
+        
     }
-
+    
     @Test
     public void testTable2() {
         Parser p = new Parser();
@@ -386,7 +386,7 @@ public class TestParser {
         tpa(p.pCreateTable, "create table a(Z timestamp);");
         tpa(p.pCreateTable, "create table a(Z timestamp(4));");
     }
-
+    
     @Test
     public void testTable3() {
         Parser p = new Parser();
@@ -402,7 +402,7 @@ public class TestParser {
         assertTrue(c3.temporary);
         assertEquals(c3.onCommitRows, Ast.OnCommitRows.PRESERVE);
     }
-
+    
     @Test
     public void testTableCk() {
         Parser p = new Parser();
@@ -411,9 +411,9 @@ public class TestParser {
         assertTrue(c0.relationalProperties.get(1) instanceof Ast.CheckConstraintDefinition);
         Ast.CheckConstraintDefinition cd = (Ast.CheckConstraintDefinition) c0.relationalProperties.get(1);
         assertTrue(cd.name.val.equals("X"));
-
+        
     }
-
+    
     @Test
     public void testTablePk() {
         Parser p = new Parser();
@@ -425,7 +425,7 @@ public class TestParser {
         List<String> collect = cd.columns.stream().map(x -> x.val).collect(Collectors.toList());
         assertArrayEquals(new String[]{"X", "Y"}, collect.toArray());
     }
-
+    
     @Test
     public void testTableUk() {
         Parser p = new Parser();
@@ -437,7 +437,7 @@ public class TestParser {
         List<String> collect = cd.columns.stream().map(x -> x.val).collect(Collectors.toList());
         assertArrayEquals(new String[]{"X", "y"}, collect.toArray());
     }
-
+    
     @Test
     public void testTableFk() {
         Parser p = new Parser();
@@ -456,7 +456,7 @@ public class TestParser {
             assertArrayEquals(new String[]{"X", "Y"}, collect.toArray());
         }
     }
-
+    
     @Test
     public void testComments() {
         Parser p = new Parser();
@@ -465,14 +465,14 @@ public class TestParser {
         assertEquals("BLA", c0.tableName.name.val);
         assertTrue(c0.tableName.owner == null);
         assertEquals("blabal", c0.comment.val);
-
+        
         Ast.CommentOnColumn c1 = tpa(p.pCommentOnColumn,
                 "comment on column bla.x is 'blabal';");
         assertEquals("BLA", c1.tableName.name.val);
         assertTrue(c1.tableName.owner == null);
         assertEquals("blabal", c1.comment.val);
         assertEquals("X", c1.column.val);
-
+        
         Ast.CommentOnColumn c2 = tpa(p.pCommentOnColumn,
                 "comment on column bla.x.y is 'blabal';");
         assertEquals("BLA", c2.tableName.owner.val);
@@ -480,7 +480,7 @@ public class TestParser {
         assertEquals("blabal", c2.comment.val);
         assertEquals("Y", c2.column.val);
     }
-
+    
     @Test
     public void testCreateIndex() {
         Parser p = new Parser();
@@ -499,11 +499,11 @@ public class TestParser {
             assertEquals(2, c1.columns.size());
             assertEquals("t", c1.tableName.name.val);
             assertTrue(c1.tableName.owner == null);
-
+            
             assertEquals("X", c1.indexName.name.val);
             assertTrue(c1.indexName.owner == null);
         }
-
+        
         {
             Ast.CreateIndex c1 = tpa(p.pCreateIndex,
                     "create  index idx_table6_2 on table6(x*x);");
@@ -512,9 +512,9 @@ public class TestParser {
             Ast.CreateIndex c1 = tpa(p.pCreateIndex,
                     "create unique index idx_table6_2 on table6 (\"X\" * \"X\");");
         }
-
+        
     }
-
+    
     @Test
     public void testOrgExternal() {
         Parser p = new Parser();
@@ -542,7 +542,7 @@ public class TestParser {
                     + "      location('q', 'x')\n"
                     + "    );");
             assertEquals("ORACLE_LOADER", c.organisationExternal.type);
-
+            
         }
         {
             Ast.CreateTable c = tpa(p.pCreateTable,
@@ -559,7 +559,7 @@ public class TestParser {
                     + "      location('q', 'x')\n"
                     + "    );");
             assertTrue(c.organisationExternal.type == null);
-
+            
         }
         {
             Ast.CreateTable c = tpa(p.pCreateTable,
@@ -570,7 +570,19 @@ public class TestParser {
                     + "	\"REGISTRATION_DEADLINE\" DATE\n"
                     + "   ) ;");
             assertTrue(c.organisationExternal == null);
-
+            
+        }
+    }
+    
+    @Test
+    public void testAlterTableAddConstraint() {
+        Parser p = new Parser();
+        {
+            Ast.AlterTableAddConstraint c = tpa(p.pAlterTableAddConstraint, "alter table x.y add constraint \"Bla\" check( 1<>2);");
+            assertEquals("X", c.tableName.owner.val);
+            assertEquals("Y", c.tableName.name.val);
+            assertEquals("Bla", c.constraintDefinition.name.val);
+            assertTrue(c.constraintDefinition instanceof Ast.CheckConstraintDefinition);
         }
     }
 }

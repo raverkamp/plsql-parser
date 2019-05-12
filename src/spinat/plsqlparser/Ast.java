@@ -1603,4 +1603,15 @@ public class Ast {
             this.columns = columns;
         }
     }
+
+    public static class AlterTableAddConstraint {
+
+        public final ObjectName tableName;
+        public final ConstraintDefinition constraintDefinition;
+
+        public AlterTableAddConstraint(ObjectName tableName, ConstraintDefinition constraintDefinition1) {
+            this.tableName = tableName;
+            this.constraintDefinition = constraintDefinition1;
+        }
+    }
 }

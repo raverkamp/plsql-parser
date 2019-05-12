@@ -2857,4 +2857,33 @@ public class Parser {
         }
     };
 
+    public Res<Ast.ObjectName> paAlterTable(Seq s) {
+        Res r = c.forkw2("alter", "table").pa(s);
+        if (r == null) {
+            return null;
+        }
+        Res<Ast.ObjectName> ro = paObjectName(r.next);
+        must(ro, r.next, "expecting tablename");
+        return ro;
+    }
+
+    public Pa<Ast.AlterTableAddConstraint> pAlterTableAddConstraint = new Pa<Ast.AlterTableAddConstraint>() {
+        @Override
+        protected Res<Ast.AlterTableAddConstraint> par(Seq s) {
+            Res<Ast.ObjectName> ro = paAlterTable(s);
+            if (ro == null) {
+                return null;
+            }
+            Res radd = c.forkw("add").pa(ro.next);
+            if (radd == null) {
+                return null;
+            }
+            Res<Ast.RelationalProperty> rc = paConstraintDefinition(radd.next);
+            if (rc == null) {
+                return null;
+            }
+            Res rend = c.mustp(c.pSemi, "expecting semicolon").pa(rc.next);
+            return new Res<Ast.AlterTableAddConstraint>(new Ast.AlterTableAddConstraint(ro.v, (Ast.CheckConstraintDefinition) rc.v), rend.next);
+        }
+    };
 }
