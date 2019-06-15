@@ -1465,12 +1465,14 @@ public class Ast {
 
         public final Ast.Ident name;
         public final DataType datatype;
+        public final Expression defaultValue;
         public final boolean nullable;
 
-        public ColumnDefinition(Ast.Ident name, DataType datatype, boolean nullable) {
+        public ColumnDefinition(Ast.Ident name, DataType datatype, Expression defaultValue, boolean nullable) {
             this.name = name;
             this.datatype = datatype;
             this.nullable = nullable;
+            this.defaultValue = defaultValue;
         }
     }
 

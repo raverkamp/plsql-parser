@@ -2673,13 +2673,14 @@ public class Parser {
         if (rd == null) {
             return null;
         }
-        Res<Boolean> r2 = c.bopt(pNotNull).pa(rd.next);
-        Res<T2<String, Ast.Expression>> r3 = c.seq2(pAssignOrDefault, pExpr).pa(r2.next);
-        if (r3 == null) {
-            return new Res<>(new Ast.ColumnDefinition(r1.v, rd.v, !r2.v), r2.next);
-        } else {
-            return new Res<>(new Ast.ColumnDefinition(r1.v, rd.v, !r2.v), r3.next);
-        }
+
+        Res<T2<String, Ast.Expression>> rDefault = c.opt(c.seq2(pAssignOrDefault, pExpr)).pa(rd.next);
+        Res<Boolean> rNotNull = c.bopt(pNotNull).pa(rDefault.next);
+
+        Expression e =  rDefault.v != null? rDefault.v.f2 : null;
+
+        return new Res<>(new Ast.ColumnDefinition(r1.v, rd.v, e, !rNotNull.v), rNotNull.next);
+
     }
 
     public Res<Ast.RelationalProperty> paConstraintDefinition(Seq s) {
@@ -2883,7 +2884,7 @@ public class Parser {
                 return null;
             }
             Res rend = c.mustp(c.pSemi, "expecting semicolon").pa(rc.next);
-            return new Res<Ast.AlterTableAddConstraint>(new Ast.AlterTableAddConstraint(ro.v,(Ast.ConstraintDefinition) rc.v), rend.next);
+            return new Res<Ast.AlterTableAddConstraint>(new Ast.AlterTableAddConstraint(ro.v, (Ast.ConstraintDefinition) rc.v), rend.next);
         }
     };
 }
